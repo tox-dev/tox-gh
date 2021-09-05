@@ -1,0 +1,70 @@
+name: check
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 8 * * *"
+
+jobs:
+  pre_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.0
+
+  test:
+    name: test ${{ matrix.py }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - Ubuntu
+          - Windows
+          - MacOs
+        py:
+          - "3.10.0-rc.1"
+          - "3.9"
+          - "3.8"
+          - "3.7"
+          - "3.6"
+    steps:
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install self-tox
+        run: python -m pip install --use-feature=in-tree-build .
+      - name: Setup test suite
+        run: tox4 r -vv --notest
+      - name: Run test suite
+        run: tox4 r --skip-pkg-install
+        env:
+          PYTEST_ADDOPTS: "-vv --durations=10"
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    needs: [ test, pre_commit ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup python to build package
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+      - name: Install build
+        run: python -m pip install build
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build package
+        run: pyproject-build -s -w . -o dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          skip_existing: true
+          user: __token__
+          password: ${{ secrets.pypi_password }}
