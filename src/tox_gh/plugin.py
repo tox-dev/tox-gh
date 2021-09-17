@@ -9,7 +9,9 @@ from tox.config.loader.section import Section
 from tox.config.main import Config
 from tox.config.sets import ConfigSet
 from tox.config.types import EnvList
+from tox.execute import Outcome
 from tox.plugin import impl
+from tox.tox_env.api import ToxEnv
 from virtualenv.discovery.py_info import PythonInfo
 
 
@@ -39,9 +41,11 @@ class GhActionsConfigSet(ConfigSet):
 
 
 @impl
-def tox_add_core_config(core_conf: ConfigSet, config: "Config") -> None:  # noqa: U100
+def tox_add_core_config(core_conf: ConfigSet, config: "Config") -> None:
+    core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=is_running_on_actions())
+
     bail_reason = None
-    if not is_running_on_actions():
+    if not core_conf["is_on_gh_action"]:
         bail_reason = "tox is not running in GitHub Actions"
     elif getattr(config.options.env, "use_default_list", False) is False:
         bail_reason = f"envlist is explicitly given via {'TOXENV'if os.environ.get('TOXENV') else '-e flag'}"
@@ -57,3 +61,15 @@ def tox_add_core_config(core_conf: ConfigSet, config: "Config") -> None:  # noqa
     if env_list is not None:  # override the env_list core configuration with our values
         logging.warning("tox-gh set %s", ", ".join(env_list))
         config.core.loaders.insert(0, MemoryLoader(env_list=env_list))
+
+
+@impl
+def tox_before_run_commands(tox_env: ToxEnv) -> None:
+    if tox_env.core["is_on_gh_action"]:
+        print(f"::group::tox:{tox_env.name}")
+
+
+@impl
+def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: List[Outcome]) -> None:  # noqa: U100
+    if tox_env.core["is_on_gh_action"]:
+        print("::endgroup::")

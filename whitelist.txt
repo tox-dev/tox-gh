@@ -8,4 +8,5 @@ pyston
 setenv
 tox
 toxenv
+unittest
 virtualenv

@@ -1,4 +1,5 @@
 import sys
+from unittest.mock import ANY
 
 from tox.pytest import MonkeyPatch, ToxProjectCreator
 
@@ -43,7 +44,18 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None
     result = project.run()
     result.assert_success()
 
-    assert "ROOT: running tox-gh" in result.out
-    assert "ROOT: tox-gh set a, b" in result.out
+    assert result.out.splitlines() == [
+        "ROOT: running tox-gh",
+        "ROOT: tox-gh set a, b",
+        "::group::tox:a",
+        "::endgroup::",
+        ANY,  # a finished
+        "::group::tox:b",
+        "::endgroup::",
+        ANY,  # a status
+        ANY,  # b status
+        ANY,  # outcome
+    ]
+
     assert "a: OK" in result.out
     assert "b: OK" in result.out
