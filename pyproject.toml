@@ -1,13 +1,6 @@
 [build-system]
-requires = [
-    "setuptools >= 57",
-    "wheel >= 0.37",
-    "setuptools_scm[toml]>=6",
-]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-write_to = "src/tox_gh/version.py"
+requires = ["setuptools>=50", "setuptools_scm>=6"]
+build-backend = 'setuptools.build_meta'
 
 [tool.black]
 line-length = 120
@@ -16,3 +9,13 @@ line-length = 120
 line_length = 120
 profile = "black"
 known_first_party = ["tox_gh"]
+
+[tool.setuptools_scm]
+write_to = "src/tox_gh/version.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
