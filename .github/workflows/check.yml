@@ -11,19 +11,20 @@ concurrency:
 
 jobs:
   test:
-    name: test with CPython ${{ matrix.py }}
+    name: test with ${{ matrix.py }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         py:
+          - "3.11.0-beta.5"
           - "3.10"
           - "3.9"
           - "3.8"
           - "3.7"
         os:
-          - ubuntu-20.04
-          - macos-11
+          - ubuntu-22.04
+          - macos-12
           - windows-2022
     steps:
       - name: Setup python for tox
@@ -41,12 +42,10 @@ jobs:
           python-version: ${{ matrix.py }}
       - name: Pick environment to run
         run: |
-          import os
-          import sys
-          from pathlib import Path
-          env = "TOXENV=py{}{}\n".format(*sys.version_info[0:2])
-          print("Picked:\n{}for{}".format(env, sys.version))
-          with Path(os.environ["GITHUB_ENV"]).open("a") as file_handler:
+          import codecs; import os; import sys
+          env = f"TOXENV=py3{sys.version_info[0]}\n"
+          print("Picked:\n{env}for{sys.version}")
+          with codecs.open(os.environ["GITHUB_ENV"], "a", "utf-8") as file_handler:
                file_handler.write(env)
         shell: python
       - name: Setup test suite
@@ -59,7 +58,7 @@ jobs:
 
   check:
     name: tox env ${{ matrix.tox_env }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -85,7 +84,7 @@ jobs:
   publish:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs: [check, test]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Setup python to build package
         uses: actions/setup-python@v4
@@ -99,7 +98,7 @@ jobs:
       - name: Build sdist and wheel
         run: python -m build -s -w . -o dist
       - name: Publish to PyPi
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@v1.5.1
         with:
           skip_existing: true
           user: __token__
