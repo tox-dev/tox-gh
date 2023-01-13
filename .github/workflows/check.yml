@@ -40,18 +40,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py }}
-      - name: Pick environment to run
-        run: |
-          import codecs; import os; import sys
-          env = f"TOXENV=py3{sys.version_info[0]}\n"
-          print("Picked:\n{env}for{sys.version}")
-          with codecs.open(os.environ["GITHUB_ENV"], "a", "utf-8") as file_handler:
-               file_handler.write(env)
-        shell: python
       - name: Setup test suite
-        run: tox -vv --notest
+        run: tox -e py${{ matrix.py }} -vv --notest
       - name: Run test suite
-        run: tox --skip-pkg-install
+        run: tox -e py${{ matrix.py }} --skip-pkg-install
         env:
           PYTEST_ADDOPTS: "-vv --durations=20"
           CI_RUN: "yes"

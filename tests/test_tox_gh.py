@@ -49,9 +49,13 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
+        "a: freeze> python -m pip freeze --all",
+        ANY,  # freeze list
         "::group::tox:a",
         "::endgroup::",
         ANY,  # a finished
+        "b: freeze> python -m pip freeze --all",
+        ANY,  # freeze list
         "::group::tox:b",
         "::endgroup::",
         ANY,  # a status
