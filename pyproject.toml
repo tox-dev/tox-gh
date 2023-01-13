@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=65.5", "setuptools-scm>=7.0.5"]
+requires = ["setuptools>=65.7", "setuptools-scm>=7.1"]
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
@@ -19,3 +19,10 @@ testpaths = ["tests"]
 [tool.mypy]
 python_version = "3.9"
 strict = true
+
+[tool.flake8]
+max-complexity = 22
+max-line-length = 120
+unused-arguments-ignore-abstract-functions = true
+noqa-require-code = true
+dictionaries = ["en_US", "python", "technical", "django"]
