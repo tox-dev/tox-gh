@@ -16,6 +16,8 @@ from tox.session.state import State
 from tox.tox_env.api import ToxEnv
 from virtualenv.discovery.py_info import PythonInfo  # type: ignore # no types defined
 
+GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY")
+
 
 def is_running_on_actions() -> bool:
     """:return: True if running on Github Actions platform"""
@@ -75,3 +77,13 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
 def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outcome]) -> None:  # noqa: U100
     if tox_env.core["is_on_gh_action"]:
         print("::endgroup::")
+        write_to_summary(exit_code == Outcome.OK, tox_env.name)
+
+
+def write_to_summary(success: bool, message: str) -> None:
+    """Write a success or failure value to the github step summary if it exists"""
+    if not GITHUB_STEP_SUMMARY:
+        return
+    success_str = ":white_check_mark:" if success else ":negative_squared_cross_mark:"
+    with open(GITHUB_STEP_SUMMARY, "a+") as f:
+        print(f"{success_str}: {message}", file=f)
