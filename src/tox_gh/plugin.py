@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import shutil
 import sys
 from typing import Dict
@@ -84,6 +85,7 @@ def write_to_summary(success: bool, message: str) -> None:
     """Write a success or failure value to the github step summary if it exists"""
     if not GITHUB_STEP_SUMMARY:
         return
+    summary_path = pathlib.Path(GITHUB_STEP_SUMMARY)
     success_str = ":white_check_mark:" if success else ":negative_squared_cross_mark:"
-    with open(GITHUB_STEP_SUMMARY, "a+") as f:
-        print(f"{success_str}: {message}", file=f)
+    with summary_path.open("a+") as summary_file:
+        print(f"{success_str}: {message}", file=summary_file)
