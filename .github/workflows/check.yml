@@ -24,9 +24,9 @@ jobs:
           - "3.8"
           - "3.7"
         os:
-          - ubuntu-22.04
-          - macos-12
-          - windows-2022
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
       - name: Setup python for tox
         uses: actions/setup-python@v4
@@ -51,7 +51,7 @@ jobs:
 
   check:
     name: tox env ${{ matrix.tox_env }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -73,4 +73,3 @@ jobs:
         run: tox -vv --notest -e ${{ matrix.tox_env }}
       - name: Run test suite
         run: tox --skip-pkg-install -e ${{ matrix.tox_env }}
-

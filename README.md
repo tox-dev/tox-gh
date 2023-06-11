@@ -29,18 +29,22 @@ Add `[gh]` section to the same file as tox configuration. If you're using `tox.i
 ```ini
 [gh]
 python =
-    3.6 = py36
-    3.7 = py37
+    3.12 = py312
+    3.11 = py311, type
+    3.10 = py310
+    3.9 = py39
     3.8 = py38
-    3.9 = py39, type
+    3.7 = py37
 ```
 
 This will run different set of tox environments on different python versions set up via GitHub `setup-python` action:
 
-- on Python 3.6 job, tox runs `py36` environment,
 - on Python 3.7 job, tox runs `py37` environment,
 - on Python 3.8 job, tox runs `py38` environment,
-- in Python 3.9 job, tox runs `py39` and `type` environments.
+- on Python 3.9 job, tox runs `py39` environment,
+- on Python 3.10 job, tox runs `py310` environment,
+- in Python 3.11 job, tox runs `py311` and `type` environments,
+- on Python 3.12 job, tox runs `py312` environment.
 
 #### Workflow Configuration
 
@@ -66,11 +70,12 @@ jobs:
           - Windows
           - MacOs
         py:
+          - "3.12"
+          - "3.11"
           - "3.10"
           - "3.9"
           - "3.8"
           - "3.7"
-          - "3.6"
     steps:
       - name: Setup python for test ${{ matrix.py }}
         uses: actions/setup-python@v2

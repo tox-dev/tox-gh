@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-import pathlib
 import sys
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-from tox.pytest import MonkeyPatch, ToxProjectCreator
-
 from tox_gh import plugin
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from tox.pytest import MonkeyPatch, ToxProjectCreator
 
 
 def test_gh_not_in_actions(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
@@ -35,7 +38,7 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
     assert "tox-gh won't override envlist because envlist is explicitly given via TOXENV" in result.out
 
 
-def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: pathlib.Path) -> None:
+def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path) -> None:
     step_output_file = tmp_path / "gh_out"
     step_output_file.touch()
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
@@ -77,7 +80,7 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
     assert ":white_check_mark:: b" in summary_text
 
 
-def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: pathlib.Path) -> None:
+def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path) -> None:
     step_output_file = tmp_path / "gh_out"
     step_output_file.touch()
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
