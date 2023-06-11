@@ -5,10 +5,10 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/p/filelock
+      url: https://pypi.org/p/tox-gh
     permissions:
       id-token: write
     steps:
