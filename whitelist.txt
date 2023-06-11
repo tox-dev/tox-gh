@@ -1,8 +1,0 @@
-delenv
-exe
-gh
-pyston
-setenv
-tox
-toxenv
-virtualenv
