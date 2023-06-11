@@ -58,17 +58,17 @@ on:
   schedule:
     - cron: "0 8 * * *"
 
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
-    name: test ${{ matrix.py }} - ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}-latest
+    name: test with ${{ matrix.py }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - Ubuntu
-          - Windows
-          - MacOs
         py:
           - "3.12"
           - "3.11"
@@ -76,20 +76,24 @@ jobs:
           - "3.9"
           - "3.8"
           - "3.7"
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py }}
-      - uses: actions/checkout@v2
-      - name: Install tox-gh
-        run: python -m pip install tox-gh
+      - name: Install tox
+        run: python -m pip install tox-gh>=1.2
       - name: Setup test suite
-        run: tox4 r -vv --notest
+        run: tox -vv --notest
       - name: Run test suite
-        run: tox4 r --skip-pkg-install
-        env:
-          PYTEST_ADDOPTS: "-vv --durations=10"
+        run: tox --skip-pkg-install
 ```
 
 ## FAQ
