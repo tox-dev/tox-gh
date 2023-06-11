@@ -101,14 +101,14 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_p
         "a: freeze> python -m pip freeze --all",
         ANY,  # freeze list
         "::group::tox:a",
-        "a: commands[0]> python -c 'exit(1)'",
+        ANY,  # "a: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # process details
         "::endgroup::",
         ANY,  # a finished
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
         "::group::tox:b",
-        "b: commands[0]> python -c 'exit(1)'",
+        ANY,  # "b: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # b process details
         "::endgroup::",
         ANY,  # a status
