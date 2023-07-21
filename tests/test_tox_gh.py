@@ -58,13 +58,17 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
+        "::group::tox:install",
         "a: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:a",
         "::endgroup::",
         ANY,  # a finished
+        "::group::tox:install",
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:b",
         "::endgroup::",
         ANY,  # a status
@@ -101,15 +105,19 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_p
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
+        "::group::tox:install",
         "a: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:a",
         ANY,  # "a: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # process details
         "::endgroup::",
         ANY,  # a finished
+        "::group::tox:install",
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:b",
         ANY,  # "b: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # b process details
