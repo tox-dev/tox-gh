@@ -6,6 +6,7 @@ import os
 import pathlib
 import shutil
 import sys
+import threading
 from typing import TYPE_CHECKING, Any, Dict
 
 from tox.config.loader.memory import MemoryLoader
@@ -80,7 +81,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
         state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
 
 
-installing = False
+_STATE = threading.local()
 
 
 @impl
@@ -93,10 +94,11 @@ def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) 
     :param section: section of the installation
     :param of_type: type of the installation
     """
-    global installing  # noqa: PLW0603
-    if tox_env.core["is_on_gh_action"] and not installing:
-        installing = True
-        print("::group::tox:install")  # noqa: T201
+    if tox_env.core["is_on_gh_action"]:
+        installing = getattr(_STATE, "installing", False)
+        if not installing:
+            _STATE.installing = True
+            print("::group::tox:install")  # noqa: T201
 
 
 @impl
@@ -106,10 +108,9 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
 
     :param tox_env: the tox environment
     """
-    global installing  # noqa: PLW0603
     if tox_env.core["is_on_gh_action"]:
-        assert installing  # noqa: S101
-        installing = False
+        assert _STATE.installing  # noqa: S101
+        _STATE.installing = False
         print("::endgroup::")  # noqa: T201
         print(f"::group::tox:{tox_env.name}")  # noqa: T201
 
