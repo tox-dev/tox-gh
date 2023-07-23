@@ -41,12 +41,15 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
 def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path) -> None:
     step_output_file = tmp_path / "gh_out"
     step_output_file.touch()
+    empty_requirements = tmp_path / "empty.txt"
+    empty_requirements.touch()
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
     monkeypatch.setattr(plugin, "GITHUB_STEP_SUMMARY", str(step_output_file))
     ini = f"""
     [testenv]
-    package = skip
+    package = editable
+    deps = -r {empty_requirements}
     [gh]
     python =
         {sys.version_info[0]} = a, b
@@ -54,19 +57,34 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
     project = tox_project({"tox.ini": ini})
     result = project.run()
     result.assert_success()
-
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
+        "::group::tox:install",
+        f"a: install_deps> python -I -m pip install -r {empty_requirements}",
+        ANY,  # pip install setuptools wheel
+        ANY,  # .pkg: _optional_hooks
+        ANY,  # .pkg: get_requires_for_build_editable
+        ANY,  # .pkg: install_requires_for_build_editable
+        ".pkg: freeze> python -m pip freeze --all",
+        ANY,  # freeze list
+        ANY,  # .pkg: build_editable
+        ANY,  # a: install_package
         "a: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:a",
         "::endgroup::",
         ANY,  # a finished
+        "::group::tox:install",
+        f"b: install_deps> python -I -m pip install -r {empty_requirements}",
+        ANY,  # b: install_package
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:b",
         "::endgroup::",
+        ANY,  # .pkg: _exit
         ANY,  # a status
         ANY,  # b status
         ANY,  # outcome
@@ -101,15 +119,19 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_p
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
+        "::group::tox:install",
         "a: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:a",
         ANY,  # "a: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # process details
         "::endgroup::",
         ANY,  # a finished
+        "::group::tox:install",
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
+        "::endgroup::",
         "::group::tox:b",
         ANY,  # "b: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
         ANY,  # b process details
