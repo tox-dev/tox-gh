@@ -68,7 +68,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     elif getattr(state.conf.options.env, "is_default_list", False) is False:
         bail_reason = f"envlist is explicitly given via {'TOXENV'if os.environ.get('TOXENV') else '-e flag'}"
     if bail_reason:
-        logging.warning("tox-gh won't override envlist because %s", bail_reason)
+        logging.debug("tox-gh won't override envlist because %s", bail_reason)
         return
 
     logging.warning("running tox-gh")

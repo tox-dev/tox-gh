@@ -15,16 +15,24 @@ if TYPE_CHECKING:
 def test_gh_not_in_actions(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
     monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
+    result = project.run("-vv")
+    result.assert_success()
+    assert "tox-gh won't override envlist because tox is not running in GitHub Actions" in result.out
+
+
+def test_gh_not_in_actions_quiet(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
     result = project.run()
     result.assert_success()
-    assert "ROOT: tox-gh won't override envlist because tox is not running in GitHub Actions" in result.out
+    assert "tox-gh won't override envlist because tox is not running in GitHub Actions" not in result.out
 
 
 def test_gh_e_flag_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
     project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
-    result = project.run("-e", "py")
+    result = project.run("-e", "py", "-vv")
     result.assert_success()
     assert "tox-gh won't override envlist because envlist is explicitly given via -e flag" in result.out
 
@@ -33,7 +41,7 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("TOXENV", "py")
     project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
-    result = project.run()
+    result = project.run("-vv")
     result.assert_success()
     assert "tox-gh won't override envlist because envlist is explicitly given via TOXENV" in result.out
 
