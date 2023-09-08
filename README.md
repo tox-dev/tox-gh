@@ -35,12 +35,10 @@ python =
     3.10 = py310
     3.9 = py39
     3.8 = py38
-    3.7 = py37
 ```
 
 This will run different set of tox environments on different python versions set up via GitHub `setup-python` action:
 
-- on Python 3.7 job, tox runs `py37` environment,
 - on Python 3.8 job, tox runs `py38` environment,
 - on Python 3.9 job, tox runs `py39` environment,
 - on Python 3.10 job, tox runs `py310` environment,
@@ -76,7 +74,6 @@ jobs:
           - "3.10"
           - "3.9"
           - "3.8"
-          - "3.7"
         os:
           - ubuntu-latest
           - macos-latest
