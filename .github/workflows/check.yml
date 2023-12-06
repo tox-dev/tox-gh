@@ -30,7 +30,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
+        cache: "pip"
         with:
           python-version: ${{ matrix.py }}
       - name: Install self
