@@ -15,7 +15,7 @@ from tox.config.sets import ConfigSet
 from tox.config.types import EnvList
 from tox.execute import Outcome
 from tox.plugin import impl
-from virtualenv.discovery.py_info import PythonInfo  # type: ignore[import] # no types defined
+from virtualenv.discovery.py_info import PythonInfo
 
 if TYPE_CHECKING:
     from tox.session.state import State

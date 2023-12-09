@@ -1,6 +1,9 @@
 name: check
 on:
+  workflow_dispatch:
   push:
+    branches: "main"
+    tags-ignore: ["**"]
   pull_request:
   schedule:
     - cron: "0 8 * * *"
@@ -17,6 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         py:
+          - "3.12"
           - "3.11"
           - "3.10"
           - "3.9"
@@ -30,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py }}
       - name: Install self
