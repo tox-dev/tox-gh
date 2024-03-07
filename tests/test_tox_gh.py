@@ -92,7 +92,6 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
         "::endgroup::",
         "::group::tox:b",
         "::endgroup::",
-        ANY,  # .pkg: _exit
         ANY,  # a status
         ANY,  # b status
         ANY,  # outcome
