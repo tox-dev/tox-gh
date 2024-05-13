@@ -16,7 +16,9 @@ keywords = [
   "virtual",
 ]
 license = "MIT"
-maintainers = [{ name = "Bernát Gábor", email = "gaborjbernat@gmail.com" }]
+maintainers = [
+  { name = "Bernát Gábor", email = "gaborjbernat@gmail.com" },
+]
 requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -51,11 +53,14 @@ urls.Documentation = "https://github.com/tox-dev/tox-gh#tox-gh"
 urls.Homepage = "https://github.com/tox-dev/tox-gh"
 urls.Source = "https://github.com/tox-dev/tox-gh"
 urls.Tracker = "https://github.com/tox-dev/tox-gh/issues"
-entry-points.tox = {"tox-gh" = "tox_gh.plugin"}
+entry-points.tox.tox-gh = "tox_gh.plugin"
 
 [tool.hatch]
 build.hooks.vcs.version-file = "src/tox_gh/version.py"
-build.targets.sdist.include = ["/src", "/tests"]
+build.targets.sdist.include = [
+  "/src",
+  "/tests",
+]
 version.source = "vcs"
 
 [tool.black]
@@ -64,8 +69,15 @@ line-length = 120
 [tool.ruff]
 line-length = 120
 target-version = "py38"
-lint.isort = { known-first-party = ["tox_gh", "tests"], required-imports = ["from __future__ import annotations"] }
-lint.select = ["ALL"]
+lint.isort = { known-first-party = [
+  "tox_gh",
+  "tests",
+], required-imports = [
+  "from __future__ import annotations",
+] }
+lint.select = [
+  "ALL",
+]
 lint.ignore = [
   "ANN101", # Missing type annotation for `self` in method
   "D301",   #  Use `r"""` if any backslashes in a docstring
@@ -100,14 +112,30 @@ count = true
 [tool.coverage]
 html.show_contexts = true
 html.skip_covered = false
-paths.source = ["src", ".tox/*/lib/*/site-packages", ".tox\\*\\Lib\\site-packages", "**/src", "**\\src"]
-paths.other = [".", "*/tox_gh", "*\\tox_gh"]
+paths.source = [
+  "src",
+  ".tox/*/lib/*/site-packages",
+  ".tox\\*\\Lib\\site-packages",
+  "**/src",
+  "**\\src",
+]
+paths.other = [
+  ".",
+  "*/tox_gh",
+  "*\\tox_gh",
+]
 report.fail_under = 96
 run.parallel = true
-run.plugins = ["covdefaults"]
+run.plugins = [
+  "covdefaults",
+]
 
 [tool.mypy]
 python_version = "3.11"
 show_error_codes = true
 strict = true
-overrides = [{ module = ["virtualenv.*"], ignore_missing_imports = true }]
+overrides = [
+  { module = [
+    "virtualenv.*",
+  ], ignore_missing_imports = true },
+]
