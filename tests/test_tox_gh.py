@@ -73,7 +73,6 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
         ANY,  # pip install setuptools wheel
         ANY,  # .pkg: _optional_hooks
         ANY,  # .pkg: get_requires_for_build_editable
-        ANY,  # .pkg: install_requires_for_build_editable
         ".pkg: freeze> python -m pip freeze --all",
         ANY,  # freeze list
         ANY,  # .pkg: build_editable

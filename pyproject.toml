@@ -2,7 +2,7 @@
 build-backend = "hatchling.build"
 requires = [
   "hatch-vcs>=0.4",
-  "hatchling>=1.21.1",
+  "hatchling>=1.25",
 ]
 
 [project]
@@ -40,14 +40,14 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "tox>=4.12.1",
+  "tox>=4.15.1",
 ]
 optional-dependencies.test = [
   "covdefaults>=2.3",
   "devpi-process>=1",
-  "pytest>=8",
-  "pytest-cov>=4.1",
-  "pytest-mock>=3.12",
+  "pytest>=8.2.2",
+  "pytest-cov>=5",
+  "pytest-mock>=3.14",
 ]
 urls.Documentation = "https://github.com/tox-dev/tox-gh#tox-gh"
 urls.Homepage = "https://github.com/tox-dev/tox-gh"
