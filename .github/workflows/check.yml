@@ -39,10 +39,13 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
           allow-prereleases: true
-      - name: setup uv for tox
-        uses: yezz123/setup-uv@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: install self with tox-uv
-        run: uv pip install tox-uv tox-gh@. --system
+        run: uv pip install tox-uv tox-gh@. --system --python ${{ matrix.py }}
       - name: Setup test suite
         run: tox run -vv --skip-missing-interpreters false --notest
       - name: Run test suite
