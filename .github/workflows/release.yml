@@ -16,14 +16,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: setup uv for tox
-        uses: yezz123/setup-uv@v4
-      - name: Install build
-        run: uv pip install build[uv] --system
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build package
-        run: pyproject-build --installer uv --sdist --wheel . --outdir dist
+        run: uv build --sdist --wheel . --out-dir dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.10.1
+        with:
+          attestations: true
