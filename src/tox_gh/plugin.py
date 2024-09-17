@@ -33,6 +33,9 @@ def is_running_on_actions() -> bool:
 
 def get_python_version_keys() -> list[str]:
     """:return: python spec for the python interpreter"""
+    if os.environ.get("TOX_GH_MAJOR_MINOR"):
+        major_minor_version = os.environ["TOX_GH_MAJOR_MINOR"]
+        return [major_minor_version, major_minor_version.split(".")[0]]
     python_exe = shutil.which("python") or sys.executable
     info = PythonInfo.from_exe(exe=python_exe)
     major_version = str(info.version_info[0])

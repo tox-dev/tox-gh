@@ -4,12 +4,19 @@ import sys
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
+import pytest
+
 from tox_gh import plugin
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from tox.pytest import MonkeyPatch, ToxProjectCreator
+
+
+@pytest.fixture(autouse=True)
+def _clear_env_var(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
 
 
 def test_gh_not_in_actions(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
@@ -46,7 +53,12 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
     assert "tox-gh won't override envlist because envlist is explicitly given via TOXENV" in result.out
 
 
-def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path) -> None:
+@pytest.mark.parametrize("via_env", [True, False])
+def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, via_env: bool) -> None:
+    if via_env:
+        monkeypatch.setenv("TOX_GH_MAJOR_MINOR", f"{sys.version_info.major}.{sys.version_info.minor}")
+    else:
+        monkeypatch.setenv("PATH", "")
     step_output_file = tmp_path / "gh_out"
     step_output_file.touch()
     empty_requirements = tmp_path / "empty.txt"
