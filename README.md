@@ -31,11 +31,12 @@ Add `[gh]` section to the same file as tox configuration. If you're using `tox.i
 ```ini
 [gh]
 python =
-    3.12 = py312
-    3.11 = py311, type
-    3.10 = py310
-    3.9 = py39
-    3.8 = py38
+    3.8 = 3.8
+    3.9 = 3.9
+    3.10 = 3.10
+    3.11 = 3.11
+    3.12 = 3.12
+    3.13 = 3.13, type, dev, pkg_meta
 ```
 
 This will run different set of tox environments on different python versions set up via GitHub `setup-python` action:
