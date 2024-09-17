@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/tox-gh.svg)](https://badge.fury.io/py/tox-gh)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh.svg)](https://pypi.python.org/pypi/tox-gh/)
-[![check](https://github.com/tox-dev/tox-gh/actions/workflows/check.yml/badge.svg)](https://github.com/tox-dev/tox-gh/actions/workflows/check.yml)
+[![check](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml/badge.svg)](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml)
 [![Downloads](https://static.pepy.tech/badge/tox-gh/month)](https://pepy.tech/project/tox-gh)
 
 **tox-gh** is a tox plugin which helps running tox on GitHub Actions with multiple different Python versions on multiple
@@ -12,7 +12,8 @@ workers in parallel.
 
 When running tox on GitHub Actions, tox-gh
 
-- detects which environment to run based on configurations and
+- detects which environment to run based on configurations (or bypass detection and set it explicitly via the
+  `TOX_GH_MAJOR_MINOR` environment variable) and
 - provides utilities such as
   [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
 
@@ -47,12 +48,15 @@ This will run different set of tox environments on different python versions set
 
 #### Workflow Configuration
 
-`.github/workflows/check.yml`:
+`.github/workflows/check.yaml`:
 
 ```yaml
 name: check
 on:
+  workflow_dispatch:
   push:
+    branches: ["main"]
+    tags-ignore: ["**"]
   pull_request:
   schedule:
     - cron: "0 8 * * *"
@@ -63,12 +67,13 @@ concurrency:
 
 jobs:
   test:
-    name: test with ${{ matrix.py }} on ${{ matrix.os }}
+    name: test with ${{ matrix.env }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        py:
+        env:
+          - "3.13"
           - "3.12"
           - "3.11"
           - "3.10"
@@ -79,19 +84,32 @@ jobs:
           - macos-latest
           - windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup python for test ${{ matrix.py }}
-        uses: actions/setup-python@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.py }}
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add .local/bin to Windows PATH
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
       - name: Install tox
-        run: python -m pip install tox-gh>=1.2
+        run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh
+      - name: Install Python
+        if: matrix.env != '3.13'
+        run: uv python install --python-preference only-managed ${{ matrix.env }}
       - name: Setup test suite
-        run: tox -vv --notest
+        run: tox run -vv --notest --skip-missing-interpreters false
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.env }}
       - name: Run test suite
-        run: tox --skip-pkg-install
+        run: tox run --skip-pkg-install
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.env }}
 ```
 
 ## FAQ
