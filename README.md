@@ -5,15 +5,15 @@
 [![check](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml/badge.svg)](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml)
 [![Downloads](https://static.pepy.tech/badge/tox-gh/month)](https://pepy.tech/project/tox-gh)
 
-**tox-gh** is a tox plugin which helps running tox on GitHub Actions with multiple different Python versions on multiple
+**tox-gh** is a tox plugin, which helps run tox on GitHub Actions with multiple different Python versions on multiple
 workers in parallel.
 
 ## Features
 
-When running tox on GitHub Actions, tox-gh
+When running tox on GitHub Actions, tox-gh:
 
-- detects which environment to run based on configurations (or bypass detection and set it explicitly via the
-  `TOX_GH_MAJOR_MINOR` environment variable) and
+- detects, which environment to run based on configurations (or bypass detection and set it explicitly via the
+  `TOX_GH_MAJOR_MINOR` environment variable),
 - provides utilities such as
   [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
 
@@ -26,26 +26,41 @@ When running tox on GitHub Actions, tox-gh
 
 ### Basic Example
 
-Add `[gh]` section to the same file as tox configuration. If you're using `tox.ini`:
+Add `[gh]` section to the same file as tox configuration.
+
+If you're using `tox.ini`:
 
 ```ini
 [gh]
 python =
-    3.8 = 3.8
-    3.9 = 3.9
-    3.10 = 3.10
-    3.11 = 3.11
-    3.12 = 3.12
     3.13 = 3.13, type, dev, pkg_meta
+    3.12 = 3.12
+    3.11 = 3.11
 ```
 
-This will run different set of tox environments on different python versions set up via GitHub `setup-python` action:
+For `tox.toml`:
 
-- on Python 3.8 job, tox runs `py38` environment,
-- on Python 3.9 job, tox runs `py39` environment,
-- on Python 3.10 job, tox runs `py310` environment,
-- in Python 3.11 job, tox runs `py311` and `type` environments,
-- on Python 3.12 job, tox runs `py312` environment.
+```toml
+[gh]
+python."3.13" = ["3.13", "type", "pkg_meta"]
+python."3.12" = ["3.12"]
+python."3.11" = ["3.11"]
+```
+
+For `pyproject.toml`:
+
+```toml
+[tool.tox.gh]
+python."3.13" = ["3.13", "type", "pkg_meta"]
+python."3.12" = ["3.12"]
+python."3.11" = ["3.11"]
+```
+
+This will run a different set of tox environments on different python versions set up via GitHub `setup-python` action:
+
+- on Python 3.13 job, tox runs `3.13`, `type` and `pkg_meta` environment,
+- on Python 3.12 job, tox runs `3.12` environment,
+- on Python 3.11 job, tox runs `3.11` environment.
 
 #### Workflow Configuration
 
@@ -77,9 +92,6 @@ jobs:
           - "3.13"
           - "3.12"
           - "3.11"
-          - "3.10"
-          - "3.9"
-          - "3.8"
         os:
           - ubuntu-latest
           - macos-latest
