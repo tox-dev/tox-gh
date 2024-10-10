@@ -41,19 +41,19 @@ python =
 For `tox.toml`:
 
 ```toml
-[gh]
-python."3.13" = ["3.13", "type", "pkg_meta"]
-python."3.12" = ["3.12"]
-python."3.11" = ["3.11"]
+[gh.python]
+"3.13" = ["3.13", "type", "pkg_meta"]
+"3.12" = ["3.12"]
+"3.11" = ["3.11"]
 ```
 
 For `pyproject.toml`:
 
 ```toml
-[tool.tox.gh]
-python."3.13" = ["3.13", "type", "pkg_meta"]
-python."3.12" = ["3.12"]
-python."3.11" = ["3.11"]
+[tool.tox.gh.python]
+"3.13" = ["3.13", "type", "pkg_meta"]
+"3.12" = ["3.12"]
+"3.11" = ["3.11"]
 ```
 
 This will run a different set of tox environments on different python versions set up via GitHub `setup-python` action:
