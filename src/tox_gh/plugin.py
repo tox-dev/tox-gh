@@ -70,7 +70,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     :param core_conf: the core configuration
     :param state: tox state object
     """
-    global WILL_RUN_MULTIPLE_ENVS
+    global WILL_RUN_MULTIPLE_ENVS  # noqa: PLW0603
 
     core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=is_running_on_actions())
 
