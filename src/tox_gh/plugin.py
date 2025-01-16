@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from tox.tox_env.api import ToxEnv
 
 GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY")
+WILL_RUN_MULTIPLE_ENVS = False
 
 
 def is_running_on_actions() -> bool:
@@ -69,6 +70,8 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     :param core_conf: the core configuration
     :param state: tox state object
     """
+    global WILL_RUN_MULTIPLE_ENVS
+
     core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=is_running_on_actions())
 
     bail_reason = None
@@ -88,6 +91,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     if env_list is not None:  # override the env_list core configuration with our values
         logging.warning("tox-gh set %s", ", ".join(env_list))
         state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
+        WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
 
 
 _STATE = threading.local()
@@ -136,7 +140,8 @@ def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outco
     """
     if tox_env.core["is_on_gh_action"]:
         print("::endgroup::")  # noqa: T201
-        write_to_summary(exit_code == Outcome.OK, tox_env.name)
+        if WILL_RUN_MULTIPLE_ENVS:
+            write_to_summary(exit_code == Outcome.OK, tox_env.name)
 
 
 def write_to_summary(success: bool, message: str) -> None:  # noqa: FBT001

@@ -19,6 +19,14 @@ def _clear_env_var(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
 
 
+@pytest.fixture
+def summary_output_path(monkeypatch: MonkeyPatch, tmp_path: Path) -> Path:
+    path = tmp_path / "gh_out"
+    path.touch()
+    monkeypatch.setattr(plugin, "GITHUB_STEP_SUMMARY", str(path))
+    return path
+
+
 def test_gh_not_in_actions(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
     monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
@@ -54,18 +62,17 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
 
 
 @pytest.mark.parametrize("via_env", [True, False])
-def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, via_env: bool) -> None:
+def test_gh_ok(
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, summary_output_path: Path, via_env: bool
+) -> None:
     if via_env:
         monkeypatch.setenv("TOX_GH_MAJOR_MINOR", f"{sys.version_info.major}.{sys.version_info.minor}")
     else:
         monkeypatch.setenv("PATH", "")
-    step_output_file = tmp_path / "gh_out"
-    step_output_file.touch()
     empty_requirements = tmp_path / "empty.txt"
     empty_requirements.touch()
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
-    monkeypatch.setattr(plugin, "GITHUB_STEP_SUMMARY", str(step_output_file))
     ini = f"""
     [testenv]
     package = editable
@@ -111,17 +118,14 @@ def test_gh_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_pat
     assert "a: OK" in result.out
     assert "b: OK" in result.out
 
-    summary_text = step_output_file.read_text()
+    summary_text = summary_output_path.read_text()
     assert ":white_check_mark:: a" in summary_text
     assert ":white_check_mark:: b" in summary_text
 
 
-def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path) -> None:
-    step_output_file = tmp_path / "gh_out"
-    step_output_file.touch()
+def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
-    monkeypatch.setattr(plugin, "GITHUB_STEP_SUMMARY", str(step_output_file))
     ini = f"""
     [testenv]
     package = skip
@@ -162,6 +166,45 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_p
     assert "a: FAIL code 1" in result.out
     assert "b: FAIL code 1" in result.out
 
-    summary_text = step_output_file.read_text()
+    summary_text = summary_output_path.read_text()
     assert ":negative_squared_cross_mark:: a" in summary_text
     assert ":negative_squared_cross_mark:: b" in summary_text
+
+
+def test_gh_single_env_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    ini = f"""
+    [testenv]
+    package = editable
+    [gh]
+    python =
+        {sys.version_info[0]} = a
+    """
+    project = tox_project({"tox.ini": ini})
+    result = project.run()
+    result.assert_success()
+
+    summary_text = summary_output_path.read_text()
+    assert len(summary_text) == 0
+
+
+def test_gh_single_env_fail(
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    ini = f"""
+    [testenv]
+    package = skip
+    commands = python -c exit(1)
+    [gh]
+    python =
+        {sys.version_info[0]} = a
+    """
+    project = tox_project({"tox.ini": ini})
+    result = project.run()
+    result.assert_failed()
+
+    summary_text = summary_output_path.read_text()
+    assert len(summary_text) == 0
