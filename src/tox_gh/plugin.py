@@ -150,5 +150,5 @@ def write_to_summary(success: bool, message: str) -> None:  # noqa: FBT001
         return
     summary_path = pathlib.Path(GITHUB_STEP_SUMMARY)
     success_str = ":white_check_mark:" if success else ":negative_squared_cross_mark:"
-    with summary_path.open("a+") as summary_file:
+    with summary_path.open("a+", encoding="utf-8") as summary_file:
         print(f"{success_str}: {message}", file=summary_file)
