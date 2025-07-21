@@ -118,7 +118,7 @@ def test_gh_ok(
     assert "a: OK" in result.out
     assert "b: OK" in result.out
 
-    summary_text = summary_output_path.read_text()
+    summary_text = summary_output_path.read_text(encoding="utf-8")
     assert ":white_check_mark:: a" in summary_text
     assert ":white_check_mark:: b" in summary_text
 
@@ -166,7 +166,7 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summa
     assert "a: FAIL code 1" in result.out
     assert "b: FAIL code 1" in result.out
 
-    summary_text = summary_output_path.read_text()
+    summary_text = summary_output_path.read_text(encoding="utf-8")
     assert ":negative_squared_cross_mark:: a" in summary_text
     assert ":negative_squared_cross_mark:: b" in summary_text
 
@@ -185,7 +185,7 @@ def test_gh_single_env_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreat
     result = project.run()
     result.assert_success()
 
-    summary_text = summary_output_path.read_text()
+    summary_text = summary_output_path.read_text(encoding="utf-8")
     assert len(summary_text) == 0
 
 
@@ -206,5 +206,5 @@ def test_gh_single_env_fail(
     result = project.run()
     result.assert_failed()
 
-    summary_text = summary_output_path.read_text()
+    summary_text = summary_output_path.read_text(encoding="utf-8")
     assert len(summary_text) == 0
