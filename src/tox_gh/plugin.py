@@ -8,7 +8,7 @@ import pathlib
 import shutil
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Dict  # noqa: UP035
+from typing import TYPE_CHECKING, Any
 
 from tox.config.loader.memory import MemoryLoader
 from tox.config.loader.section import Section
@@ -56,7 +56,7 @@ class GhActionsConfigSet(ConfigSet):
         """Register the configurations."""
         self.add_config(
             "python",
-            of_type=Dict[str, EnvList],  # noqa: UP006
+            of_type=dict[str, EnvList],  # noqa: UP006
             default={},
             desc="python version to mapping",
         )
