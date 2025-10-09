@@ -56,7 +56,7 @@ class GhActionsConfigSet(ConfigSet):
         """Register the configurations."""
         self.add_config(
             "python",
-            of_type=dict[str, EnvList],  # noqa: UP006
+            of_type=dict[str, EnvList],
             default={},
             desc="python version to mapping",
         )
