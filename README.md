@@ -114,7 +114,7 @@ on:
     branches: ["main"]
     tags-ignore: ["**"]
   pull_request:
-  schedule:  # Runs at 8 AM every day
+  schedule: # Runs at 8 AM every day
     - cron: "0 8 * * *"
 
 concurrency:
