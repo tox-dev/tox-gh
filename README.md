@@ -12,7 +12,7 @@ workers in parallel.
 
 When running tox on GitHub Actions, tox-gh:
 
-- detects, which environment to run based on configurations (or bypass detection and set it explicitly via the
+- detects which environment to run based on configurations (or bypasses detection and sets it explicitly via the
   `TOX_GH_MAJOR_MINOR` environment variable),
 - provides utilities such as
   [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
@@ -33,34 +33,38 @@ If you're using `tox.ini`:
 ```ini
 [gh]
 python =
-    3.13 = 3.13, type, dev, pkg_meta
+    3.14t = 3.14t
+    3.14 = 3.14, type, dev, pkg_meta
+    3.13 = 3.13
     3.12 = 3.12
-    3.11 = 3.11
 ```
 
 For `tox.toml`:
 
 ```toml
 [gh.python]
-"3.13" = ["3.13", "type", "pkg_meta"]
+"3.14t" = ["3.14t",]
+"3.14" = ["3.14", "type", "pkg_meta"]
+"3.13" = ["3.13"]
 "3.12" = ["3.12"]
-"3.11" = ["3.11"]
 ```
 
 For `pyproject.toml`:
 
 ```toml
 [tool.tox.gh.python]
-"3.13" = ["3.13", "type", "pkg_meta"]
+"3.14t" = ["3.14t"]
+"3.14" = ["3.14", "type", "pkg_meta"]
+"3.13" = ["3.13"]
 "3.12" = ["3.12"]
-"3.11" = ["3.11"]
 ```
 
-This will run a different set of tox environments on different python versions set up via GitHub `setup-python` action:
+This will run a different set of tox environments on different Python versions set up via GitHub `setup-python` action:
 
-- on Python 3.13 job, tox runs `3.13`, `type` and `pkg_meta` environment,
+- on Python 3.14t job, tox runs `3.14t` environment,
+- on Python 3.14 job, tox runs `3.14`, `type` and `pkg_meta` environments,
+- on Python 3.13 job, tox runs `3.13` environment,
 - on Python 3.12 job, tox runs `3.12` environment,
-- on Python 3.11 job, tox runs `3.11` environment.
 
 #### Workflow Configuration
 
@@ -75,19 +79,20 @@ jobs:
       fail-fast: false
       matrix:
         env:
+          - "3.14t"
+          - "3.14"
           - "3.13"
-          - "3.12"
         os:
           - ubuntu-latest
           - macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
       - name: Install tox
-        run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh
+        run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh
       - name: Install Python
-        if: matrix.env != '3.13'
+        if: matrix.env != '3.14'
         run: uv python install --python-preference only-managed ${{ matrix.env }}
       - name: Setup test suite
         run: tox run -vv --notest --skip-missing-interpreters false
@@ -109,7 +114,7 @@ on:
     branches: ["main"]
     tags-ignore: ["**"]
   pull_request:
-  schedule:
+  schedule:  # Runs at 8 AM every day
     - cron: "0 8 * * *"
 
 concurrency:
@@ -124,19 +129,19 @@ jobs:
       fail-fast: false
       matrix:
         env:
+          - "3.14t"
+          - "3.14"
           - "3.13"
-          - "3.12"
-          - "3.11"
         os:
           - ubuntu-latest
           - macos-latest
           - windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
@@ -146,9 +151,9 @@ jobs:
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
       - name: Install tox
-        run: uv tool install --python-preference only-managed --python 3.13 tox --with tox-uv --with tox-gh
+        run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh
       - name: Install Python
-        if: matrix.env != '3.13'
+        if: matrix.env != '3.14'
         run: uv python install --python-preference only-managed ${{ matrix.env }}
       - name: Setup test suite
         run: tox run -vv --notest --skip-missing-interpreters false
