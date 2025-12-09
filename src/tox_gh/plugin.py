@@ -123,8 +123,7 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
     """
     if tox_env.core["is_on_gh_action"]:
         # Check if we're coming from an install phase (defensive check for lock-based runners)
-        installing = getattr(_STATE, "installing", False)
-        if installing:
+        if getattr(_STATE, "installing", False):
             # Traditional path: close the install group that was opened in tox_on_install
             _STATE.installing = False
             print("::endgroup::")  # noqa: T201

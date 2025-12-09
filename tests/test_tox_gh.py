@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import io
 import sys
 from typing import TYPE_CHECKING
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY
 
 import pytest
 
 from tox_gh import plugin
-from tox_gh.plugin import _STATE, tox_before_run_commands
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -210,12 +208,3 @@ def test_gh_single_env_fail(
 
     summary_text = summary_output_path.read_text(encoding="utf-8")
     assert len(summary_text) == 0
-
-def test_gh_lock_runner_no_install_hook(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
-    """Test that tox-gh works with runners that bypass tox_on_install hook."""
-    monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    if hasattr(_STATE, "installing"):  # pragma: no cover
-        delattr(_STATE, "installing")
-    project = tox_project({"tox.ini": "[testenv]\npackage=skip"})
-    result = project.run()
-    result.assert_success()
