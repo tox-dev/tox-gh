@@ -122,9 +122,13 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
     :param tox_env: the tox environment
     """
     if tox_env.core["is_on_gh_action"]:
-        assert _STATE.installing  # noqa: S101
-        _STATE.installing = False
-        print("::endgroup::")  # noqa: T201
+        # Check if we're coming from an install phase (defensive check for lock-based runners)
+        installing = getattr(_STATE, "installing", False)
+        if installing:
+            # Traditional path: close the install group that was opened in tox_on_install
+            _STATE.installing = False
+            print("::endgroup::")  # noqa: T201
+        # Always open the test execution group
         print(f"::group::tox:{tox_env.name}")  # noqa: T201
 
 
