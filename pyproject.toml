@@ -110,8 +110,15 @@ write-changes = true
 count = true
 
 [tool.coverage]
-html.show_contexts = true
-html.skip_covered = false
+run.parallel = true
+run.plugins = [
+  "covdefaults",
+]
+paths.other = [
+  ".",
+  "*/tox_gh",
+  "*\\tox_gh",
+]
 paths.source = [
   "src",
   ".tox/*/lib/*/site-packages",
@@ -119,16 +126,9 @@ paths.source = [
   "**/src",
   "**\\src",
 ]
-paths.other = [
-  ".",
-  "*/tox_gh",
-  "*\\tox_gh",
-]
 report.fail_under = 96
-run.parallel = true
-run.plugins = [
-  "covdefaults",
-]
+html.show_contexts = true
+html.skip_covered = false
 
 [tool.mypy]
 python_version = "3.11"
