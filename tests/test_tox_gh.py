@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from unittest.mock import ANY
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
 from tox_gh import plugin
+from tox_gh.plugin import get_python_version_keys
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -187,6 +188,25 @@ def test_gh_single_env_ok(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreat
 
     summary_text = summary_output_path.read_text(encoding="utf-8")
     assert len(summary_text) == 0
+
+
+@pytest.mark.parametrize(
+    ("free_threaded", "expected"),
+    [
+        pytest.param(True, ["3.13t", "3.13", "3"], id="freethreaded"),
+        pytest.param(False, ["3.13", "3"], id="standard"),
+    ],
+)
+def test_freethreaded_python_detection(monkeypatch: MonkeyPatch, free_threaded: bool, expected: list[str]) -> None:
+    monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
+    mock_info = MagicMock()
+    mock_info.version_info = (3, 13, 1, "final", 0)
+    mock_info.implementation = "CPython"
+    mock_info.free_threaded = free_threaded
+    with patch.object(plugin, "PythonInfo") as mock_cls:
+        mock_cls.from_exe.return_value = mock_info
+        result = get_python_version_keys()
+    assert result == expected
 
 
 def test_gh_single_env_fail(

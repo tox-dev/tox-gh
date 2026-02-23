@@ -45,7 +45,8 @@ def get_python_version_keys() -> list[str]:
         return [f"pypy-{major_minor_version}", f"pypy-{major_version}", f"pypy{major_version}"]
     if hasattr(sys, "pyston_version_info"):  # Pyston
         return [f"piston-{major_minor_version}", f"pyston-{major_version}"]
-    # Assume this is running on CPython
+    if getattr(info, "free_threaded", False):
+        return [f"{major_minor_version}t", major_minor_version, major_version]
     return [major_minor_version, major_version]
 
 
