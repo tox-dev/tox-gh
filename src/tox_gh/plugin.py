@@ -45,7 +45,8 @@ def get_python_version_keys() -> list[str]:
         return [f"pypy-{major_minor_version}", f"pypy-{major_version}", f"pypy{major_version}"]
     if hasattr(sys, "pyston_version_info"):  # Pyston
         return [f"piston-{major_minor_version}", f"pyston-{major_version}"]
-    # Assume this is running on CPython
+    if getattr(info, "free_threaded", False):
+        return [f"{major_minor_version}t", major_minor_version, major_version]
     return [major_minor_version, major_version]
 
 
@@ -87,11 +88,15 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     gh_config = state.conf.get_section_config(Section(None, "gh"), base=[], of_type=GhActionsConfigSet, for_env=None)
     python_mapping: dict[str, EnvList] = gh_config["python"]
 
-    env_list = next((python_mapping[i] for i in get_python_version_keys() if i in python_mapping), None)
+    python_version_keys = get_python_version_keys()
+    env_list = next((python_mapping[i] for i in python_version_keys if i in python_mapping), None)
     if env_list is not None:  # override the env_list core configuration with our values
         logging.warning("tox-gh set %s", ", ".join(env_list))
         state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
         WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
+        if not os.environ.get("TOX_GH_MAJOR_MINOR"):
+            matched_key = next(i for i in python_version_keys if i in python_mapping)
+            os.environ["TOX_GH_MAJOR_MINOR"] = matched_key
 
 
 _STATE = threading.local()
