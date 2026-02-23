@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from typing import TYPE_CHECKING
 from unittest.mock import ANY, MagicMock, patch
@@ -10,14 +11,20 @@ from tox_gh import plugin
 from tox_gh.plugin import get_python_version_keys
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from tox.pytest import MonkeyPatch, ToxProjectCreator
 
 
 @pytest.fixture(autouse=True)
-def _clear_env_var(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
+def _clear_env_var() -> Iterator[None]:
+    original = os.environ.pop("TOX_GH_MAJOR_MINOR", None)
+    yield
+    if original is not None:
+        os.environ["TOX_GH_MAJOR_MINOR"] = original
+    else:
+        os.environ.pop("TOX_GH_MAJOR_MINOR", None)
 
 
 @pytest.fixture
@@ -67,7 +74,7 @@ def test_gh_ok(
     monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, summary_output_path: Path, via_env: bool
 ) -> None:
     if via_env:
-        monkeypatch.setenv("TOX_GH_MAJOR_MINOR", f"{sys.version_info.major}.{sys.version_info.minor}")
+        os.environ["TOX_GH_MAJOR_MINOR"] = f"{sys.version_info.major}.{sys.version_info.minor}"
     else:
         monkeypatch.setenv("PATH", "")
     empty_requirements = tmp_path / "empty.txt"
@@ -207,6 +214,23 @@ def test_freethreaded_python_detection(monkeypatch: MonkeyPatch, free_threaded: 
         mock_cls.from_exe.return_value = mock_info
         result = get_python_version_keys()
     assert result == expected
+
+
+def test_override_sets_tox_gh_major_minor(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    ini = f"""
+    [testenv]
+    package = skip
+    [gh]
+    python =
+        {sys.version_info[0]}.{sys.version_info[1]} = a
+    """
+    project = tox_project({"tox.ini": ini})
+    result = project.run()
+    result.assert_success()
+    assert "tox-gh set a" in result.out
+    assert os.environ.get("TOX_GH_MAJOR_MINOR") == f"{sys.version_info[0]}.{sys.version_info[1]}"
 
 
 def test_gh_single_env_fail(
