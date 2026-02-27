@@ -146,6 +146,14 @@ Now the Python 3.13 job will run three tox environments sequentially: `py313`, `
 When using factored environments (e.g., `py313-django{50,51}`), list the full env names since tox-gh **replaces** the
 envlist rather than filtering it:
 
+```toml
+[gh.python]
+"3.13" = ["py313-django{50,51,52}"]
+"3.12" = ["py312-django{50,51,52}"]
+```
+
+In `tox.ini`:
+
 ```ini
 [gh]
 python =
