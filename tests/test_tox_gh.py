@@ -216,6 +216,14 @@ def test_freethreaded_python_detection(monkeypatch: MonkeyPatch, free_threaded: 
     assert result == expected
 
 
+def test_python_detection_fails(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
+    with patch.object(plugin, "PythonInfo") as mock_cls:
+        mock_cls.from_exe.return_value = None
+        with pytest.raises(RuntimeError, match="failed to detect Python version"):
+            get_python_version_keys()
+
+
 def test_override_sets_tox_gh_major_minor(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
