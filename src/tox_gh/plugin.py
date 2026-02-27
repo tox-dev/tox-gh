@@ -38,7 +38,9 @@ def get_python_version_keys() -> list[str]:
         major_minor_version = os.environ["TOX_GH_MAJOR_MINOR"]
         return [major_minor_version, major_minor_version.split(".")[0]]
     python_exe = shutil.which("python") or sys.executable
-    info = PythonInfo.from_exe(exe=python_exe)
+    if (info := PythonInfo.from_exe(exe=python_exe)) is None:
+        msg = f"failed to detect Python version from {python_exe}, set TOX_GH_MAJOR_MINOR environment variable"
+        raise RuntimeError(msg)
     major_version = str(info.version_info[0])
     major_minor_version = ".".join([str(i) for i in info.version_info[:2]])
     if info.implementation == "PyPy":

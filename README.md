@@ -69,8 +69,20 @@ For `tox.toml`:
 "3.12" = ["py312"]
 ```
 
+For `tox.ini`:
+
+```ini
+[gh]
+python =
+    3.13 = py313
+    3.12 = py312
+```
+
 This tells tox-gh: "When running on Python 3.13, run the `py313` environment. When running on Python 3.12, run the
 `py312` environment."
+
+> **Note**: In `tox.ini`, the `[gh] python` dict entries must use `=` as the key-value separator (not `:`). Using `:`
+> will cause parsing to fail silently since `:` is an INI key-value delimiter.
 
 ### Step 2: Create a GitHub Actions workflow
 
@@ -121,7 +133,33 @@ Add a list of environments for a Python version:
 "3.13" = ["py313", "type", "lint"]
 ```
 
+In `tox.ini`:
+
+```ini
+[gh]
+python =
+    3.13 = py313, type, lint
+```
+
 Now the Python 3.13 job will run three tox environments sequentially: `py313`, `type`, and `lint`.
+
+When using factored environments (e.g., `py313-django{50,51}`), list the full env names since tox-gh **replaces** the
+envlist rather than filtering it:
+
+```toml
+[gh.python]
+"3.13" = ["py313-django{50,51,52}"]
+"3.12" = ["py312-django{50,51,52}"]
+```
+
+In `tox.ini`:
+
+```ini
+[gh]
+python =
+    3.13 = py313-django{50,51,52}
+    3.12 = py312-django{50,51,52}
+```
 
 ### How to test freethreaded Python builds
 
@@ -131,6 +169,15 @@ Freethreaded Python (3.13t, 3.14t) is automatically detected. Map it like any ot
 [gh.python]
 "3.14t" = ["py314t"]
 "3.14" = ["py314", "type"]
+```
+
+In `tox.ini`:
+
+```ini
+[gh]
+python =
+    3.14t = py314t
+    3.14 = py314, type
 ```
 
 The plugin checks for the freethreaded attribute and generates the correct version key with the `t` suffix.
@@ -191,10 +238,28 @@ Maps Python version strings to lists of tox environments.
 **Location**: The configuration can be placed in `tox.ini` under `[gh] python = ...`, in `tox.toml` under `[gh.python]`,
 or in `pyproject.toml` under `[tool.tox.gh.python]`.
 
-**Format**:
+**Format** (`tox.toml`):
+
+```toml
+[gh.python]
+"<version>" = ["<env>", ...]
+```
+
+**Format** (`tox.ini`):
 
 ```ini
-[gh.python]
+[gh]
+python =
+    <version> = <env>, ...
+```
+
+> **Important**: In `tox.ini`, dict entries under `python` must use `=` as the separator. Do not use `:` — it is treated
+> as an INI key-value delimiter and will silently break the mapping.
+
+**Format** (`pyproject.toml`):
+
+```toml
+[tool.tox.gh.python]
 "<version>" = ["<env>", ...]
 ```
 
@@ -202,7 +267,11 @@ or in `pyproject.toml` under `[tool.tox.gh.python]`.
 use `"3.14"`, `"3.13"`, `"3.12"`, `"3.11"`, or `"3.10"`. Major-only fallbacks use `"3"`. PyPy versions use
 `"pypy-3.13"`, `"pypy-3"`, or `"pypy3"`. Pyston versions use `"piston-3.13"` or `"pyston-3"`.
 
-**Examples**:
+**Behavior**: The matched environment list **replaces** the tox `env_list` entirely. It does not filter the existing
+envlist. When using factored environments, you must specify the full env names (generative syntax like `{50,51}` is
+supported).
+
+**Examples** (`tox.toml`):
 
 ```toml
 # Run one environment per version
@@ -221,6 +290,28 @@ use `"3.14"`, `"3.13"`, `"3.12"`, `"3.11"`, or `"3.10"`. Major-only fallbacks us
 # Fallback to major version
 [gh.python]
 "3" = ["py3"]
+```
+
+**Examples** (`tox.ini`):
+
+```ini
+# Run one environment per version
+[gh]
+python =
+    3.13 = py313
+
+# Run multiple environments on one version
+# python =
+#     3.13 = py313, type, lint
+
+# Freethreaded Python
+# python =
+#     3.14t = py314t
+#     3.14 = py314
+
+# Fallback to major version
+# python =
+#     3 = py3
 ```
 
 ### Environment Variables
