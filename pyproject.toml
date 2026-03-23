@@ -109,6 +109,16 @@ builtin = "clear,usage,en-GB_to_en-US"
 write-changes = true
 count = true
 
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+strict = true
+overrides = [
+  { module = [
+    "virtualenv.*",
+  ], ignore_missing_imports = true },
+]
+
 [tool.coverage]
 run.parallel = true
 run.plugins = [
@@ -129,13 +139,3 @@ paths.source = [
 report.fail_under = 96
 html.show_contexts = true
 html.skip_covered = false
-
-[tool.mypy]
-python_version = "3.11"
-show_error_codes = true
-strict = true
-overrides = [
-  { module = [
-    "virtualenv.*",
-  ], ignore_missing_imports = true },
-]
