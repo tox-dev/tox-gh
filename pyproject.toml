@@ -57,12 +57,12 @@ urls.Tracker = "https://github.com/tox-dev/tox-gh/issues"
 entry-points.tox.tox-gh = "tox_gh.plugin"
 
 [tool.hatch]
+version.source = "vcs"
 build.hooks.vcs.version-file = "src/tox_gh/version.py"
 build.targets.sdist.include = [
   "/src",
   "/tests",
 ]
-version.source = "vcs"
 
 [tool.black]
 line-length = 120
@@ -111,13 +111,13 @@ count = true
 
 [tool.mypy]
 python_version = "3.11"
-show_error_codes = true
 strict = true
 overrides = [
   { module = [
     "virtualenv.*",
   ], ignore_missing_imports = true },
 ]
+show_error_codes = true
 
 [tool.coverage]
 run.parallel = true
