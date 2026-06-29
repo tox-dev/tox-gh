@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from tox.pytest import MonkeyPatch, ToxProjectCreator
 
 
-@pytest.fixture(autouse=True)  # noqa: RUF076
+@pytest.fixture(autouse=True)
 def _clear_env_var() -> Iterator[None]:
     original = os.environ.pop("TOX_GH_MAJOR_MINOR", None)
     yield
