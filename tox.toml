@@ -6,7 +6,7 @@ skip_missing_interpreters = true
 description = "run the tests with pytest under {env_name}"
 package = "wheel"
 wheel_build_env = ".pkg"
-extras = ["testing"]
+dependency_groups = ["test"]
 pass_env = ["DIFF_AGAINST", "PYTEST_*", "TOX_GH_MAJOR_MINOR"]
 set_env.COVERAGE_FILE = { replace = "env", name = "COVERAGE_FILE", default = "{work_dir}{/}.coverage.{env_name}" }
 set_env.COVERAGE_FILECOVERAGE_PROCESS_START = "{tox_root}{/}pyproject.toml"
@@ -54,7 +54,7 @@ commands = [["pre-commit", "run", "--all-files", "--show-diff-on-failure", { rep
 
 [env.type]
 description = "run type check on code base"
-extras = ["testing"]
+dependency_groups = ["test"]
 deps = ["ty>=0.0.59"]
 commands = [["ty", "check", "--error", "all", "--output-format", "concise", "--error-on-warning", "."]]
 
@@ -81,7 +81,8 @@ deps = [
   { replace = "ref", of = [ "env", "release", "deps"], extend = true },
   { replace = "ref", of = [ "requires"], extend = true },
 ]
-extras = ["docs", "testing"]
+extras = ["docs"]
+  dependency_groups = ["test"]
 commands = [["uv", "pip", "tree"], ["python", "-c", 'print(r"{env_python}")']]
 
 [gh.python]
