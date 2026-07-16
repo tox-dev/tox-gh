@@ -109,15 +109,8 @@ builtin = "clear,usage,en-GB_to_en-US"
 write-changes = true
 count = true
 
-[tool.mypy]
-python_version = "3.11"
-strict = true
-overrides = [
-  { module = [
-    "virtualenv.*",
-  ], ignore_missing_imports = true },
-]
-show_error_codes = true
+[tool.ty]
+environment.python-version = "3.14"
 
 [tool.coverage]
 run.parallel = true

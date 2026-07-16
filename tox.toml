@@ -54,8 +54,9 @@ commands = [["pre-commit", "run", "--all-files", "--show-diff-on-failure", { rep
 
 [env.type]
 description = "run type check on code base"
-deps = ["mypy==1.11.2"]
-commands = [["mypy", "src{/}tox_gh"], ["mypy", "tests"]]
+extras = ["testing"]
+deps = ["ty>=0.0.59"]
+commands = [["ty", "check", "--output-format", "concise", "--error-on-warning", "."]]
 
 [env.pkg_meta]
 description = "check that the long description is valid"
