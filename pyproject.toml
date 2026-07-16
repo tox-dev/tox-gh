@@ -41,6 +41,7 @@ dynamic = [
 ]
 dependencies = [
   "tox>=4.31",
+  "typing-extensions>=4.12; python_version<'3.12'",
 ]
 optional-dependencies.testing = [
   "covdefaults>=2.3",

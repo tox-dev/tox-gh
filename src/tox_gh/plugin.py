@@ -10,6 +10,11 @@ import sys
 import threading
 from typing import TYPE_CHECKING, Any
 
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
 from tox.config.loader.memory import MemoryLoader
 from tox.config.loader.section import Section
 from tox.config.sets import ConfigSet
@@ -55,6 +60,7 @@ def get_python_version_keys() -> list[str]:
 class GhActionsConfigSet(ConfigSet):
     """GitHub Actions config set."""
 
+    @override
     def register_config(self) -> None:
         """Register the configurations."""
         self.add_config(
