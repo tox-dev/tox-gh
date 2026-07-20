@@ -79,7 +79,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     :param core_conf: the core configuration
     :param state: tox state object
     """
-    global WILL_RUN_MULTIPLE_ENVS  # noqa: PLW0603
+    global WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement]
 
     core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=is_running_on_actions())
 
@@ -111,7 +111,7 @@ _STATE = threading.local()
 
 
 @impl
-def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) -> None:  # noqa: ANN401, ARG001
+def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) -> None:  # ruff:ignore[any-type, unused-function-argument]
     """
     Run before installing to prepare an environment.
 
@@ -124,7 +124,7 @@ def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) 
         installing = getattr(_STATE, "installing", False)
         if not installing:
             _STATE.installing = True
-            print("::group::tox:install")  # noqa: T201
+            print("::group::tox:install")  # ruff:ignore[print]
 
 
 @impl
@@ -139,13 +139,13 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
         if getattr(_STATE, "installing", False):
             # Traditional path: close the install group that was opened in tox_on_install
             _STATE.installing = False
-            print("::endgroup::")  # noqa: T201
+            print("::endgroup::")  # ruff:ignore[print]
         # Always open the test execution group
-        print(f"::group::tox:{tox_env.name}")  # noqa: T201
+        print(f"::group::tox:{tox_env.name}")  # ruff:ignore[print]
 
 
 @impl
-def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outcome]) -> None:  # noqa: ARG001
+def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outcome]) -> None:  # ruff:ignore[unused-function-argument]
     """
     Run logic before after run commands.
 
@@ -155,12 +155,12 @@ def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outco
     :param outcomes: list of outcomes
     """
     if tox_env.core["is_on_gh_action"]:
-        print("::endgroup::")  # noqa: T201
+        print("::endgroup::")  # ruff:ignore[print]
         if WILL_RUN_MULTIPLE_ENVS:
             write_to_summary(exit_code == Outcome.OK, tox_env.name)
 
 
-def write_to_summary(success: bool, message: str) -> None:  # noqa: FBT001
+def write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument]
     """Write a success or failure value to the GitHub step summary if it exists."""
     if not GITHUB_STEP_SUMMARY:
         return
