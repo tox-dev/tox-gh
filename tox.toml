@@ -1,5 +1,5 @@
 requires = ["tox>=4.31", "tox-uv>=1.28.1"]
-env_list = ["fix", "3.14", "3.13", "3.12", "3.11", "3.10", "type", "pkg_meta"]
+env_list = ["fix", "3.15", "3.15t", "3.14", "3.13", "3.12", "3.11", "3.10", "type", "pkg_meta"]
 skip_missing_interpreters = true
 
 [env_run_base]
@@ -50,7 +50,7 @@ description = "format the code base to adhere to our styles, and complain about 
 skip_install = true
 deps = ["pre-commit-uv>=4.1.3"]
 pass_env = [{ replace = "ref", of = ["env_run_base", "pass_env"], extend = true }, "PROGRAMDATA"]
-commands = [["pre-commit", "run", "--all-files", "--show-diff-on-failure", { replace = "posargs" }]]
+commands = [["pre-commit", "run", "--all-files", "--show-diff-on-failure", { replace = "posargs", extend = true }]]
 
 [env.type]
 description = "run type check on code base"
@@ -86,6 +86,8 @@ extras = ["docs"]
 commands = [["uv", "pip", "tree"], ["python", "-c", 'print(r"{env_python}")']]
 
 [gh.python]
+"3.15" = ["3.15"]
+"3.15t" = ["3.15t"]
 "3.14" = ["3.13", "type", "pkg_meta"]
 "3.13" = ["3.13"]
 "3.12" = ["3.12"]
