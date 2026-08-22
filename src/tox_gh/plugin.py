@@ -8,7 +8,7 @@ import pathlib
 import shutil
 import sys
 import threading
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -94,7 +94,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
 
     logging.warning("running tox-gh")
     gh_config = state.conf.get_section_config(Section(None, "gh"), base=[], of_type=GhActionsConfigSet, for_env=None)
-    python_mapping: dict[str, EnvList] = gh_config["python"]
+    python_mapping = cast("dict[str, EnvList]", gh_config["python"])
 
     python_version_keys = get_python_version_keys()
     env_list = next((python_mapping[i] for i in python_version_keys if i in python_mapping), None)
