@@ -42,7 +42,7 @@ dynamic = [
 ]
 dependencies = [
   "tox>=4.64.7",
-  "typing-extensions>=4.16; python_version < '3.12'",
+  "typing-extensions>=4.16; python_version<'3.12'",
 ]
 urls.Documentation = "https://github.com/tox-dev/tox-gh#tox-gh"
 urls.Homepage = "https://github.com/tox-dev/tox-gh"
