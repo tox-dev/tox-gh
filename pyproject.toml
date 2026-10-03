@@ -2,7 +2,7 @@
 build-backend = "hatchling.build"
 requires = [
   "hatch-vcs>=0.5",
-  "hatchling>=1.27",
+  "hatchling>=1.32.4",
 ]
 
 [project]
@@ -41,8 +41,8 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "tox>=4.31",
-  "typing-extensions>=4.12; python_version<'3.12'",
+  "tox>=4.64.7",
+  "typing-extensions>=4.16; python_version<'3.12'",
 ]
 urls.Documentation = "https://github.com/tox-dev/tox-gh#tox-gh"
 urls.Homepage = "https://github.com/tox-dev/tox-gh"
@@ -53,11 +53,11 @@ entry-points.tox.tox-gh = "tox_gh.plugin"
 [dependency-groups]
 test = [
   "covdefaults>=2.3",
-  "devpi-process>=1.0.2",
-  "diff-cover>=9.7.1",
-  "pytest>=8.4.2",
-  "pytest-cov>=7",
-  "pytest-mock>=3.15.1",
+  "devpi-process>=1.2",
+  "diff-cover>=10.6",
+  "pytest>=9.1.1",
+  "pytest-cov>=7.1",
+  "pytest-mock>=3.16",
 ]
 
 [tool.hatch]
