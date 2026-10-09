@@ -26,7 +26,6 @@ jobs:
           - "3.13"
           - "3.12"
           - "3.11"
-          - "3.10"
         os:
           - ubuntu-26.04
           - macos-latest
@@ -47,9 +46,9 @@ jobs:
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
       - name: Install tox
-        run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh@.
+        run: uv tool install --python-preference only-managed --python 3.15 tox --with tox-uv --with tox-gh@.
       - name: Install Python
-        if: matrix.env != '3.14'
+        if: matrix.env != '3.15'
         run: uv python install --python-preference only-managed ${{ matrix.env }}
       - name: Setup test suite
         run: tox run -vv --notest --skip-missing-interpreters false
