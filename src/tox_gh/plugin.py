@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from tox.session.state import State
     from tox.tox_env.api import ToxEnv
 
-GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY")
+GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY", "")
 WILL_RUN_MULTIPLE_ENVS = False
 
 
@@ -39,7 +39,7 @@ def is_running_on_actions() -> bool:
 
 def get_python_version_keys() -> list[str]:
     """:return: python spec for the python interpreter"""
-    if os.environ.get("TOX_GH_MAJOR_MINOR"):
+    if os.environ.get("TOX_GH_MAJOR_MINOR", ""):
         major_minor_version = os.environ["TOX_GH_MAJOR_MINOR"]
         return [major_minor_version, major_minor_version.split(".")[0]]
     python_exe = shutil.which("python") or sys.executable
@@ -87,8 +87,8 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     if not core_conf["is_on_gh_action"]:
         bail_reason = "tox is not running in GitHub Actions"
     elif getattr(state.conf.options.env, "is_default_list", False) is False:
-        bail_reason = f"envlist is explicitly given via {'TOXENV' if os.environ.get('TOXENV') else '-e flag'}"
-    if bail_reason:
+        bail_reason = f"envlist is explicitly given via {'TOXENV' if os.environ.get('TOXENV', '') else '-e flag'}"
+    if bail_reason is not None:
         logging.debug("tox-gh won't override envlist because %s", bail_reason)
         return
 
@@ -102,7 +102,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
         logging.warning("tox-gh set %s", ", ".join(env_list))
         state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
         WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
-        if not os.environ.get("TOX_GH_MAJOR_MINOR"):
+        if not os.environ.get("TOX_GH_MAJOR_MINOR", ""):
             matched_key = next(i for i in python_version_keys if i in python_mapping)
             os.environ["TOX_GH_MAJOR_MINOR"] = matched_key
 

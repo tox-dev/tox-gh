@@ -1,19 +1,20 @@
-requires = ["tox>=4.64.7", "tox-uv>=1.36.1"]
-env_list = ["fix", "3.15", "3.15t", "3.14", "3.13", "3.12", "3.11", "3.10", "type", "pkg_meta"]
+requires = [ "tox>=4.64.7", "tox-uv>=1.36.1" ]
+env_list = [ "3.15", "3.14", "3.13", "3.12", "3.11", "3.15t", "fix", "pkg_meta", "type" ]
 skip_missing_interpreters = true
 
 [env_run_base]
 description = "run the tests with pytest under {env_name}"
+default_base_python = [ "3.15" ]
 package = "wheel"
 wheel_build_env = ".pkg"
-dependency_groups = ["test"]
-pass_env = ["DIFF_AGAINST", "PYTEST_*", "TOX_GH_MAJOR_MINOR"]
+dependency_groups = [ "test" ]
+pass_env = [ "DIFF_AGAINST", "PYTEST_*", "TOX_GH_MAJOR_MINOR" ]
 set_env.COVERAGE_FILE = { replace = "env", name = "COVERAGE_FILE", default = "{work_dir}{/}.coverage.{env_name}" }
 set_env.COVERAGE_FILECOVERAGE_PROCESS_START = "{tox_root}{/}pyproject.toml"
 commands = [
   [
     "pytest",
-    { replace = "posargs", extend = true, default = [
+    { replace = "posargs", default = [
       "--durations",
       "5",
       "--junitxml",
@@ -35,7 +36,7 @@ commands = [
       "xml:{work_dir}{/}coverage.{env_name}.xml",
       "tests",
       "--run-integration",
-    ] },
+    ], extend = true },
   ],
   [
     "diff-cover",
@@ -45,51 +46,53 @@ commands = [
   ],
 ]
 
+[env_pkg_base]
+default_base_python = [ "3.15" ]
+
 [env.fix]
 description = "format the code base to adhere to our styles, and complain about what we cannot do automatically"
 skip_install = true
-deps = ["pre-commit-uv>=4.3"]
-pass_env = [{ replace = "ref", of = ["env_run_base", "pass_env"], extend = true }, "PROGRAMDATA"]
-commands = [["pre-commit", "run", "--all-files", "--show-diff-on-failure", { replace = "posargs", extend = true }]]
-
-[env.type]
-description = "run type check on code base"
-dependency_groups = ["test"]
-deps = ["ty>=0.0.84"]
-commands = [["ty", "check", "--error", "all", "--output-format", "concise", "--error-on-warning", "."]]
+deps = [ "pre-commit-uv>=4.3" ]
+pass_env = [ { replace = "ref", of = [ "env_run_base", "pass_env" ], extend = true }, "PROGRAMDATA" ]
+commands = [ [ "pre-commit", "run", "--all-files", "--show-diff-on-failure", { replace = "posargs", extend = true } ] ]
 
 [env.pkg_meta]
 description = "check that the long description is valid"
 skip_install = true
-deps = ["check-wheel-contents>=0.6.3", "twine>=7", "uv>=0.12.22"]
+deps = [ "check-wheel-contents>=0.6.3", "twine>=7", "uv>=0.12.22" ]
 commands = [
-  [ "uv", "build", "--sdist", "--wheel", "--out-dir", "{env_tmp_dir}", "."],
+  [ "uv", "build", "--sdist", "--wheel", "--out-dir", "{env_tmp_dir}", "." ],
   [ "twine", "check", "{env_tmp_dir}{/}*" ],
   [ "check-wheel-contents", "--no-config", "{env_tmp_dir}" ],
 ]
 
-[env.release]
-description = "do a release, required posargs of the version number"
-skip_install = true
-deps = ["gitpython>=3.2", "packaging>=26.3", "towncrier>=26.9"]
-commands = [["python", "{tox_root}/tasks/release.py", "--version", "{posargs}"]]
+[env.type]
+description = "run type check on code base"
+deps = [ "ty>=0.0.84" ]
+dependency_groups = [ "test" ]
+commands = [ [ "ty", "check", "--error", "all", "--output-format", "concise", "--error-on-warning", "." ] ]
 
 [env.dev]
 description = "dev environment with all deps at {envdir}"
 package = "editable"
 deps = [
-  { replace = "ref", of = [ "env", "release", "deps"], extend = true },
-  { replace = "ref", of = [ "requires"], extend = true },
+  { replace = "ref", of = [ "env", "release", "deps" ], extend = true },
+  { replace = "ref", of = [ "requires" ], extend = true },
 ]
-extras = ["docs"]
-  dependency_groups = ["test"]
-commands = [["uv", "pip", "tree"], ["python", "-c", 'print(r"{env_python}")']]
+dependency_groups = [ "test" ]
+extras = [ "docs" ]
+commands = [ [ "uv", "pip", "tree" ], [ "python", "-c", 'print(r"{env_python}")' ] ]
+
+[env.release]
+description = "do a release, required posargs of the version number"
+skip_install = true
+deps = [ "gitpython>=3.2", "packaging>=26.3", "towncrier>=26.9" ]
+commands = [ [ "python", "{tox_root}/tasks/release.py", "--version", "{posargs}" ] ]
 
 [gh.python]
-"3.15" = ["3.15"]
-"3.15t" = ["3.15t"]
-"3.14" = ["3.13", "type", "pkg_meta"]
-"3.13" = ["3.13"]
-"3.12" = ["3.12"]
-"3.11" = ["3.11"]
-"3.10" = ["3.10"]
+"3.15" = [ "3.15", "type", "pkg_meta" ]
+"3.15t" = [ "3.15t" ]
+"3.14" = [ "3.14" ]
+"3.13" = [ "3.13" ]
+"3.12" = [ "3.12" ]
+"3.11" = [ "3.11" ]
