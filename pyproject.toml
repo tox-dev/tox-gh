@@ -139,3 +139,15 @@ paths.source = [
 report.fail_under = 96
 html.show_contexts = true
 html.skip_covered = false
+
+[tool.towncrier]
+name = "tox-gh"
+directory = "changelog.d"
+filename = "CHANGELOG.md"
+title_format = "## {version} ({project_date})"
+type = [
+  { directory = "feature", name = "Features", showcontent = true },
+  { directory = "bugfix", name = "Bug fixes", showcontent = true },
+  { directory = "doc", name = "Documentation", showcontent = true },
+  { directory = "misc", name = "Maintenance", showcontent = true },
+]
