@@ -1,7 +1,13 @@
 # tox-gh
 
-See the [changelog](CHANGELOG.md) for released changes. Pull requests need a `changelog.d/<PR>.<type>.md` fragment; use
-the `skip news` label for changes that do not need release notes.
+See the [changelog](CHANGELOG.md) for released changes. A user-facing pull request needs a
+`changelog.d/+short-name.<category>.md` fragment. The release workflow replaces the name with the squash-merged pull
+request number and credits its human authors. Use the `skip news` label for maintenance changes; bot updates need a
+fragment only when the pull request supplies one.
+
+Choose `feature` for added or removed Python support and new capabilities, `change` for changed behavior, `bugfix` for
+fixes, and `doc` for user documentation. The other categories are `security`, `performance`, `deprecation`, `removal`,
+and `packaging`. Keep each fragment about one user-visible change.
 
 [![PyPI version](https://badge.fury.io/py/tox-gh.svg)](https://badge.fury.io/py/tox-gh)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh.svg)](https://pypi.python.org/pypi/tox-gh/)
