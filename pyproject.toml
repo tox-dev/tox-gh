@@ -72,6 +72,9 @@ build.targets.sdist.include = [
   "/tests",
 ]
 
+[tool.uv]
+dependency-groups.release = { requires-python = ">=3.15" }
+
 [tool.black]
 line-length = 120
 
