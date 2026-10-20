@@ -1,6 +1,7 @@
 [build-system]
 build-backend = "hatchling.build"
 requires = [
+  "hatch-fancy-pypi-readme>=25.1",
   "hatch-vcs>=0.5",
   "hatchling>=1.32.4",
 ]
@@ -8,7 +9,6 @@ requires = [
 [project]
 name = "tox-gh"
 description = "Seamless integration of tox into GitHub Actions."
-readme = "README.md"
 keywords = [
   "environments",
   "isolated",
@@ -37,6 +37,7 @@ classifiers = [
   "Topic :: System",
 ]
 dynamic = [
+  "readme",
   "version",
 ]
 dependencies = [
@@ -66,6 +67,15 @@ release = [
 
 [tool.hatch]
 version.source = "vcs"
+metadata.hooks.fancy-pypi-readme.content-type = "text/markdown"
+metadata.hooks.fancy-pypi-readme.fragments = [ { path = "README.md" } ]
+metadata.hooks.fancy-pypi-readme.substitutions = [
+  { pattern = '''(?x)
+    (?<!!)\[(?P<label>[^\]]+)\]\( # Link text, excluding images
+    (?P<path>CHANGELOG\.md) # Repository files linked from the README
+    \)
+    ''', replacement = '[\g<label>](https://github.com/tox-dev/tox-gh/blob/main/\g<path>)' },
+]
 build.hooks.vcs.version-file = "src/tox_gh/version.py"
 build.targets.sdist.include = [
   "/src",
