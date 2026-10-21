@@ -11,9 +11,10 @@ env:
   dists-artifact-name: python-package-distributions
 jobs:
   build:
-    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@a250ca3524857236e288764651851010939b6f71
+    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@8db87d4730353b61630d66cbc592d6bed0c85d2b
     permissions:
       contents: read
+      pull-requests: read
     with:
       changelog: CHANGELOG.md
       fragments: changelog.d
@@ -41,7 +42,7 @@ jobs:
           name: ${{ env.dists-artifact-name }}
           path: dist
       - id: stage
-        uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+        uses: tox-dev/github-workflows/reconcile-pypi-artifacts@8db87d4730353b61630d66cbc592d6bed0c85d2b
         with:
           project: tox-gh
           version: ${{ github.ref_name }}
@@ -56,7 +57,7 @@ jobs:
           if-no-files-found: error
   publish-pypi:
     if: needs.stage-pypi.outputs.missing-count != '0'
-    needs: stage-pypi
+    needs: [stage-pypi, stage-github-release]
     runs-on: ubuntu-26.04
     environment:
       name: release
@@ -74,7 +75,7 @@ jobs:
           name: missing-python-manifest
           path: ${{ runner.temp }}/manifest
       - id: select
-        uses: tox-dev/github-workflows/select-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+        uses: tox-dev/github-workflows/select-pypi-artifacts@8db87d4730353b61630d66cbc592d6bed0c85d2b
         with:
           dist: dist
           manifest: ${{ runner.temp }}/manifest/pypi-missing-names.txt
@@ -91,9 +92,10 @@ jobs:
     if: |
       always() && !cancelled() &&
       needs.stage-pypi.result == 'success' &&
+      needs.stage-github-release.result == 'success' &&
       (needs.publish-pypi.result == 'success' ||
       needs.publish-pypi.result == 'skipped')
-    needs: [stage-pypi, publish-pypi]
+    needs: [stage-pypi, stage-github-release, publish-pypi]
     runs-on: ubuntu-26.04
     permissions:
       contents: read
@@ -111,7 +113,7 @@ jobs:
         with:
           name: ${{ env.dists-artifact-name }}
           path: dist
-      - uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+      - uses: tox-dev/github-workflows/reconcile-pypi-artifacts@8db87d4730353b61630d66cbc592d6bed0c85d2b
         with:
           project: tox-gh
           version: ${{ github.ref_name }}
@@ -210,7 +212,7 @@ jobs:
         with:
           name: contributor-metadata
           path: ${{ runner.temp }}/contributor-metadata
-      - uses: tox-dev/github-workflows/render-release-notes@a250ca3524857236e288764651851010939b6f71
+      - uses: tox-dev/github-workflows/render-release-notes@8db87d4730353b61630d66cbc592d6bed0c85d2b
         with:
           tag: ${{ github.ref_name }}
           changelog: CHANGELOG.md
@@ -224,8 +226,8 @@ jobs:
           path: ${{ runner.temp }}/release-notes.md
           if-no-files-found: error
           retention-days: 1
-  github-release:
-    needs: [verify-pypi, github-notes]
+  stage-github-release:
+    needs: [stage-pypi, github-notes]
     runs-on: ubuntu-26.04
     permissions:
       contents: write
@@ -234,7 +236,7 @@ jobs:
         with:
           name: github-release-notes
           path: ${{ runner.temp }}/github-release-notes
-      - uses: tox-dev/github-workflows/publish-github-release@a250ca3524857236e288764651851010939b6f71
+      - uses: tox-dev/github-workflows/publish-github-release@8db87d4730353b61630d66cbc592d6bed0c85d2b
         env:
           GH_TOKEN: ${{ github.token }}
         with:
@@ -243,3 +245,24 @@ jobs:
           commit: ${{ github.sha }}
           title: ${{ github.ref_name }}
           notes-file: ${{ runner.temp }}/github-release-notes/release-notes.md
+          mode: stage
+  github-release:
+    needs: [verify-pypi, stage-github-release]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: github-release-notes
+          path: ${{ runner.temp }}/github-release-notes
+      - uses: tox-dev/github-workflows/publish-github-release@8db87d4730353b61630d66cbc592d6bed0c85d2b
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          title: ${{ github.ref_name }}
+          notes-file: ${{ runner.temp }}/github-release-notes/release-notes.md
+          mode: publish

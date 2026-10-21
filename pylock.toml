@@ -4,8 +4,8 @@ requires-python = ">=3.11"
 extras = []
 dependency-groups = [
     "project-runtime",
-    "ci",
     "test",
+    "ci",
     "pkg-meta",
     "release",
     "build",
@@ -4137,25 +4137,25 @@ sha256 = "25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea"
 
 [[packages]]
 name = "filelock"
-version = "4.1.1"
+version = "4.1.2"
 index = "https://pypi.org/simple"
 marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
-url = "https://files.pythonhosted.org/packages/35/c8/1d457d9150ff948f2ce6ada7715e0eeebbe5d3b58a45271a1e222474bcd3/filelock-4.1.1.tar.gz"
-upload-time = 2026-10-11 16:11:54+00:00
-size = 563430
+url = "https://files.pythonhosted.org/packages/8c/32/5f1e1408eda63bdecdb814dfd18b1109d239fb9695d51780c2e8a2816e76/filelock-4.1.2.tar.gz"
+upload-time = 2026-10-14 14:47:34+00:00
+size = 565129
 
 [packages.sdist.hashes]
-sha256 = "7ba0927482c5a814b0a7f391d029ccdb8010f576f0a74c0dcde1811e8bc4c1b6"
+sha256 = "c541dd91878706be3ff20e934a0b913972d4eff7a20ddfc17defd2b7328d006c"
 
 [[packages.wheels]]
-url = "https://files.pythonhosted.org/packages/d7/8b/f837f52905395ba4510fe61f753c24833fb0a9c76e21267bb9f828b664a9/filelock-4.1.1-py3-none-any.whl"
-upload-time = 2026-10-11 16:11:52+00:00
-size = 132460
+url = "https://files.pythonhosted.org/packages/1b/84/16cbc2a5a102edf4b745ca43d7b9aaa8e26d46686c8e54d70d3d1225659e/filelock-4.1.2-py3-none-any.whl"
+upload-time = 2026-10-14 14:47:33+00:00
+size = 132861
 
 [packages.wheels.hashes]
-sha256 = "3f4a557945a7b0f95efeb1f432267affe5d45ac8ddde2aed1b97ebb62382c089"
+sha256 = "4d5dc2a1d64d6b48a5f0540814000986fd62ebd3ac9ccbb1d07d669e075db9bb"
 
 [[packages]]
 name = "h11"
@@ -7529,14 +7529,14 @@ sha256 = "d0dae1f74bb273b534770cb4cccb6bb78735540afdb03c2146f4e19dcd412560"
 
 [[packages]]
 name = "release-creator"
-version = "0.4.2.dev48+g7c126334a"
+version = "0.4.2.dev61+ga5873f5d6"
 marker = "(\"release\" in dependency_groups and (python_full_version >= '3.15'))"
 
 [packages.vcs]
 type = "git"
 url = "https://github.com/tox-dev/release-creator"
-requested-revision = "7c126334a6b6627976e69afb77f720d48d1394fd"
-commit-id = "7c126334a6b6627976e69afb77f720d48d1394fd"
+requested-revision = "a5873f5d66c5b1ff07da6294aa2719764fa9f864"
+commit-id = "a5873f5d66c5b1ff07da6294aa2719764fa9f864"
 
 [[packages]]
 name = "repoze-lru"
