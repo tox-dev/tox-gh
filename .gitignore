@@ -2,6 +2,7 @@
 .idea
 *.egg-info
 .tox/
+/.venv
 .coverage*
 coverage.xml
 .*_cache
