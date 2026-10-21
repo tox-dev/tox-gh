@@ -4,11 +4,14 @@ on:
     tags: ["*"]
 permissions:
   contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 env:
   dists-artifact-name: python-package-distributions
 jobs:
   build:
-    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@d88002302950ed36200e62673f592acc40e6b151
+    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@a250ca3524857236e288764651851010939b6f71
     permissions:
       contents: read
     with:
@@ -16,10 +19,44 @@ jobs:
       fragments: changelog.d
       format: markdown
       artifact-base-url: https://pypi.org/project/tox-gh/
-  release:
-    needs:
-      - build
-      - github-notes
+  stage-pypi:
+    needs: [build, github-notes]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    outputs:
+      missing-count: ${{ steps.stage.outputs.missing-count }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: latest-known
+          python-version: "3.15"
+          enable-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ env.dists-artifact-name }}
+          path: dist
+      - id: stage
+        uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+        with:
+          project: tox-gh
+          version: ${{ github.ref_name }}
+          dist: dist
+          mode: stage
+          missing-dir: ${{ runner.temp }}/missing
+      - if: steps.stage.outputs.missing-count != '0'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: missing-python-manifest
+          path: ${{ steps.stage.outputs.manifest }}
+          if-no-files-found: error
+  publish-pypi:
+    if: needs.stage-pypi.outputs.missing-count != '0'
+    needs: stage-pypi
     runs-on: ubuntu-26.04
     environment:
       name: release
@@ -31,11 +68,52 @@ jobs:
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: ${{ env.dists-artifact-name }}
-          path: dist/
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: missing-python-manifest
+          path: ${{ runner.temp }}/manifest
+      - id: select
+        uses: tox-dev/github-workflows/select-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+        with:
+          dist: dist
+          manifest: ${{ runner.temp }}/manifest/pypi-missing-names.txt
+          output-dir: selected-dist
+          expected-count: ${{ needs.stage-pypi.outputs.missing-count }}
       - name: Publish to PyPI
+        if: steps.select.outputs.selected-count != '0'
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           attestations: true
+          packages-dir: selected-dist
+          skip-existing: true
+  verify-pypi:
+    if: ${{ always() && !cancelled() && needs.stage-pypi.result == 'success' && (needs.publish-pypi.result == 'success' || needs.publish-pypi.result == 'skipped') }}
+    needs: [stage-pypi, publish-pypi]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: latest-known
+          python-version: "3.15"
+          enable-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ env.dists-artifact-name }}
+          path: dist
+      - uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a250ca3524857236e288764651851010939b6f71
+        with:
+          project: tox-gh
+          version: ${{ github.ref_name }}
+          dist: dist
+          mode: verify
+          wait-seconds: "120"
   previous-tag:
     needs: build
     runs-on: ubuntu-26.04
@@ -50,6 +128,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
+          version: latest-known
           python-version: "3.15"
           enable-cache: false
       - name: Install locked release tools
@@ -110,6 +189,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
+          version: latest-known
           python-version: "3.15"
           enable-cache: false
       - name: Install locked release tools
@@ -126,7 +206,7 @@ jobs:
         with:
           name: contributor-metadata
           path: ${{ runner.temp }}/contributor-metadata
-      - uses: tox-dev/github-workflows/render-release-notes@d88002302950ed36200e62673f592acc40e6b151
+      - uses: tox-dev/github-workflows/render-release-notes@a250ca3524857236e288764651851010939b6f71
         with:
           tag: ${{ github.ref_name }}
           changelog: CHANGELOG.md
@@ -141,7 +221,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
   github-release:
-    needs: [release, github-notes]
+    needs: [verify-pypi, github-notes]
     runs-on: ubuntu-26.04
     permissions:
       contents: write
@@ -150,7 +230,7 @@ jobs:
         with:
           name: github-release-notes
           path: ${{ runner.temp }}/github-release-notes
-      - uses: tox-dev/github-workflows/publish-github-release@d88002302950ed36200e62673f592acc40e6b151
+      - uses: tox-dev/github-workflows/publish-github-release@a250ca3524857236e288764651851010939b6f71
         env:
           GH_TOKEN: ${{ github.token }}
         with:

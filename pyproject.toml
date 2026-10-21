@@ -64,7 +64,7 @@ pkg-meta = [
 ]
 release = [
   "prek>=0.5",
-  "release-creator @ git+https://github.com/tox-dev/release-creator@7db94b1b86ee6559f22970f605a0eef7c4bff02e",
+  "release-creator @ git+https://github.com/tox-dev/release-creator@7c126334a6b6627976e69afb77f720d48d1394fd",
   "towncrier>=26.9",
 ]
 
@@ -131,6 +131,7 @@ lint.preview = true
 
 [tool.codespell]
 builtin = "clear,usage,en-GB_to_en-US"
+ignore-words-list = "cancelled"
 write-changes = true
 count = true
 
