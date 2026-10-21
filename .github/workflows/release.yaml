@@ -8,7 +8,7 @@ env:
   dists-artifact-name: python-package-distributions
 jobs:
   build:
-    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@7afb8fc8fd51942c5deedf9012dd49ed9c7b5bc1
+    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@d88002302950ed36200e62673f592acc40e6b151
     permissions:
       contents: read
     with:
@@ -126,7 +126,7 @@ jobs:
         with:
           name: contributor-metadata
           path: ${{ runner.temp }}/contributor-metadata
-      - uses: tox-dev/github-workflows/render-release-notes@7afb8fc8fd51942c5deedf9012dd49ed9c7b5bc1
+      - uses: tox-dev/github-workflows/render-release-notes@d88002302950ed36200e62673f592acc40e6b151
         with:
           tag: ${{ github.ref_name }}
           changelog: CHANGELOG.md
@@ -150,9 +150,12 @@ jobs:
         with:
           name: github-release-notes
           path: ${{ runner.temp }}/github-release-notes
-      - name: Publish GitHub Release
+      - uses: tox-dev/github-workflows/publish-github-release@d88002302950ed36200e62673f592acc40e6b151
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/github-release-notes/release-notes.md"
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          title: ${{ github.ref_name }}
+          notes-file: ${{ runner.temp }}/github-release-notes/release-notes.md
