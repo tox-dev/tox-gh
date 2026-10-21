@@ -49,7 +49,7 @@ jobs:
       - name: Add .local/bin to Windows PATH
         if: runner.os == 'Windows'
         shell: bash
-        run: echo "$USERPROFILE/.local/bin" >> "$GITHUB_PATH"
+        run: echo "$USERPROFILE/.local/bin" >>"$GITHUB_PATH"
       - name: Create tox environment
         shell: bash
         run: uv venv --python 3.15 "$TOX_TOOLS"
@@ -65,9 +65,9 @@ jobs:
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == Windows ]]; then
-            echo "$TOX_TOOLS/Scripts" >> "$GITHUB_PATH"
+            echo "$TOX_TOOLS/Scripts" >>"$GITHUB_PATH"
           else
-            echo "$TOX_TOOLS/bin" >> "$GITHUB_PATH"
+            echo "$TOX_TOOLS/bin" >>"$GITHUB_PATH"
           fi
       - name: Install Python
         if: matrix.env != '3.15'
@@ -102,7 +102,7 @@ jobs:
           uv pip sync --preview-features pylock \
             --python "$RUNNER_TEMP/release-tools/bin/python" \
             --group release pylock.toml
-          echo "$RUNNER_TEMP/release-tools/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/release-tools/bin" >>"$GITHUB_PATH"
       - uses: tox-dev/github-workflows/validate-news@8db87d4730353b61630d66cbc592d6bed0c85d2b
   hook-update-cooldown:
     if: github.event_name == 'pull_request'
@@ -133,4 +133,4 @@ jobs:
               ((.key == "changelog" or .key == "hook-update-cooldown") and
                 .value.result == "skipped" and $event != "pull_request")
             )
-          ' <<< "$NEEDS_JSON"
+          ' <<<"$NEEDS_JSON"
