@@ -75,19 +75,9 @@ commands = [ [ "ty", "check", "--error", "all", "--output-format", "concise", "-
 [env.dev]
 description = "dev environment with all deps at {envdir}"
 package = "editable"
-deps = [
-  { replace = "ref", of = [ "env", "release", "deps" ], extend = true },
-  { replace = "ref", of = [ "requires" ], extend = true },
-]
-dependency_groups = [ "test" ]
-extras = [ "docs" ]
+deps = [ { replace = "ref", of = [ "requires" ], extend = true } ]
+dependency_groups = [ "release", "test" ]
 commands = [ [ "uv", "pip", "tree" ], [ "python", "-c", 'print(r"{env_python}")' ] ]
-
-[env.release]
-description = "do a release, required posargs of the version number"
-skip_install = true
-deps = [ "gitpython>=3.2", "packaging>=26.3", "towncrier>=26.9" ]
-commands = [ [ "python", "{tox_root}/tasks/release.py", "--version", "{posargs}" ] ]
 
 [gh.python]
 "3.15" = [ "3.15", "type", "pkg_meta" ]

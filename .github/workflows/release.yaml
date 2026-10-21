@@ -8,7 +8,7 @@ env:
   dists-artifact-name: python-package-distributions
 jobs:
   build:
-    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@5e11f2254a4dcb7102747d312ad7db48a2e9b0cb
+    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@296388849cced16665b3e8b4397a22265418d3dc
     permissions:
       contents: read
     with:
@@ -126,7 +126,7 @@ jobs:
         with:
           name: contributor-metadata
           path: ${{ runner.temp }}/contributor-metadata
-      - uses: tox-dev/github-workflows/render-release-notes@5e11f2254a4dcb7102747d312ad7db48a2e9b0cb
+      - uses: tox-dev/github-workflows/render-release-notes@296388849cced16665b3e8b4397a22265418d3dc
         with:
           tag: ${{ github.ref_name }}
           changelog: CHANGELOG.md

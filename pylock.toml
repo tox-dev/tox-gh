@@ -5564,14 +5564,14 @@ sha256 = "530179cc51a1816d512b15635b3dc931295ae12efb183783ad31190a5d425d2b"
 
 [[packages]]
 name = "release-creator"
-version = "0.4.2.dev23+gcf1d89453"
+version = "0.4.2.dev25+g5ab332349"
 marker = "(\"release\" in dependency_groups and (python_full_version >= '3.15'))"
 
 [packages.vcs]
 type = "git"
 url = "https://github.com/tox-dev/release-creator"
-requested-revision = "cf1d89453fc88887e5cf924f6bc1b83157d3a6ac"
-commit-id = "cf1d89453fc88887e5cf924f6bc1b83157d3a6ac"
+requested-revision = "5ab33234939cf2969d25a11ba477c31eb264067c"
+commit-id = "5ab33234939cf2969d25a11ba477c31eb264067c"
 
 [[packages]]
 name = "repoze-lru"
