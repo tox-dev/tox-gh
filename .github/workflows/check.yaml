@@ -48,8 +48,23 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
-      - name: Install tox
-        run: uv tool install --python-preference only-managed --python 3.15 tox --with tox-uv --with tox-gh@.
+      - name: Create tox environment
+        shell: bash
+        run: uv venv --python 3.15 "$RUNNER_TEMP/tox-tools"
+      - name: Install locked tox tools
+        shell: bash
+        run: uv pip sync --preview-features pylock --python "$RUNNER_TEMP/tox-tools" --group ci --group project-runtime --group build pylock.toml
+      - name: Install tox-gh from checkout
+        shell: bash
+        run: uv pip install --python "$RUNNER_TEMP/tox-tools" --no-deps --no-build-isolation .
+      - name: Add tox to PATH
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            echo "$RUNNER_TEMP/tox-tools/Scripts" >> "$GITHUB_PATH"
+          else
+            echo "$RUNNER_TEMP/tox-tools/bin" >> "$GITHUB_PATH"
+          fi
       - name: Install Python
         if: matrix.env != '3.15'
         run: uv python install --python-preference only-managed ${{ matrix.env }}

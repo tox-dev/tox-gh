@@ -4,6 +4,7 @@ requires-python = ">=3.11"
 extras = []
 dependency-groups = [
     "project-runtime",
+    "ci",
     "test",
     "pkg-meta",
     "release",
@@ -450,7 +451,7 @@ sha256 = "ecd351a4be9d35a9eaaba244a7687143c9c7d4aea6ac964e7e7ddab20cbcf4e7"
 name = "cachetools"
 version = "7.2.1"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/31/44/71476a5812da1ddf2c9a3efd31ae76d01480a1cf03ed13ac28aa8f2402e4/cachetools-7.2.1.tar.gz"
@@ -2722,7 +2723,7 @@ sha256 = "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"
 name = "colorama"
 version = "0.4.6"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups or (\"test\" in dependency_groups and (os_name == 'nt' or sys_platform == 'win32'))"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups or (\"test\" in dependency_groups and (os_name == 'nt' or sys_platform == 'win32'))"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz"
@@ -4094,7 +4095,7 @@ sha256 = "a701553060f72d59b81f9cb1645b75ef66204427eb9dd99873c91092220e52ce"
 name = "distlib"
 version = "0.4.3"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/c9/02/bd72be9134d25ed783ecbbc38a539ffaefbf90c78418c7fb7229600dbac7/distlib-0.4.3.tar.gz"
@@ -4138,7 +4139,7 @@ sha256 = "25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea"
 name = "filelock"
 version = "4.1.1"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/35/c8/1d457d9150ff948f2ce6ada7715e0eeebbe5d3b58a45271a1e222474bcd3/filelock-4.1.1.tar.gz"
@@ -5926,7 +5927,7 @@ sha256 = "f04b7d333b27f13ca439da3cf1c75c2fba34f104969f6ce4ac8e7079699c2f4a"
 name = "packaging"
 version = "26.3"
 index = "https://pypi.org/simple"
-marker = "\"build\" in dependency_groups or \"pkg-meta\" in dependency_groups or \"project-runtime\" in dependency_groups or \"test\" in dependency_groups or (\"release\" in dependency_groups and (python_full_version >= '3.15'))"
+marker = "\"build\" in dependency_groups or \"ci\" in dependency_groups or \"pkg-meta\" in dependency_groups or \"project-runtime\" in dependency_groups or \"test\" in dependency_groups or (\"release\" in dependency_groups and (python_full_version >= '3.15'))"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz"
@@ -6102,7 +6103,7 @@ sha256 = "ad3550cc744648969ed3b810f33c9344f515ee8d8a8cec18e8f2c4a643c2181f"
 name = "platformdirs"
 version = "4.13.0"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups or \"test\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups or \"test\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/80/a8/66d45abadff219e36e2a824181b8f6a67e7ed4572934d6252c71c29d5731/platformdirs-4.13.0.tar.gz"
@@ -6124,7 +6125,7 @@ sha256 = "3dbcf4cd708f21cf876c4eaa90e58412bc4f033d87143f41b1493ff77c25b7e1"
 name = "pluggy"
 version = "1.6.0"
 index = "https://pypi.org/simple"
-marker = "\"build\" in dependency_groups or \"project-runtime\" in dependency_groups or \"test\" in dependency_groups"
+marker = "\"build\" in dependency_groups or \"ci\" in dependency_groups or \"project-runtime\" in dependency_groups or \"test\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz"
@@ -7310,7 +7311,7 @@ sha256 = "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
 name = "pyproject-api"
 version = "1.11.6"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/9c/ef/7e422ead671468b094299f54a1e0be12cf47a1c291b25c6001e60b1d1814/pyproject_api-1.11.6.tar.gz"
@@ -7464,7 +7465,7 @@ sha256 = "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
 name = "python-discovery"
 version = "1.6.2"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/b0/73/54993df8fc57e906dc9b7e01d1d9b0b2d3eb0ce3190639e33dccb12853f7/python_discovery-1.6.2.tar.gz"
@@ -8329,7 +8330,7 @@ sha256 = "32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b"
 name = "tomli-w"
 version = "1.2.0"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups or (\"release\" in dependency_groups and (python_full_version >= '3.15'))"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups or (\"release\" in dependency_groups and (python_full_version >= '3.15'))"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/19/75/241269d1da26b624c0d5e110e8149093c759b7a286138f4efd61a60e75fe/tomli_w-1.2.0.tar.gz"
@@ -8394,7 +8395,7 @@ sha256 = "ae4d223e6aadaff98d29b7f09e58d9c9ccf4cd3b455a2d2e0486d432cd8bf660"
 name = "tox"
 version = "4.65.5"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/cf/da/fede1f079b72862a9383eeff8508fa87c26c2386427cc97eab0a589fd058/tox-4.65.5.tar.gz"
@@ -8411,6 +8412,42 @@ size = 237614
 
 [packages.wheels.hashes]
 sha256 = "17baefa138f8f4c6a552f6afc136008e7bce11a94f4b8e47c87b22dd33fc80f8"
+
+[[packages]]
+name = "tox-uv"
+version = "1.37.0"
+index = "https://pypi.org/simple"
+marker = "\"ci\" in dependency_groups"
+
+[[packages.wheels]]
+url = "https://files.pythonhosted.org/packages/2a/65/7cf72148bff33fd0a572e620c7b1573d6a5e4812e9207878d4e29e4a938a/tox_uv-1.37.0-py3-none-any.whl"
+upload-time = 2026-10-11 00:33:49+00:00
+size = 6564
+
+[packages.wheels.hashes]
+sha256 = "f2e7de8f12d7ffd850d2a3dcebf278cf72a8952a9abe75d84cfb54a76ee17ae4"
+
+[[packages]]
+name = "tox-uv-bare"
+version = "1.37.0"
+index = "https://pypi.org/simple"
+marker = "\"ci\" in dependency_groups"
+
+[packages.sdist]
+url = "https://files.pythonhosted.org/packages/31/27/203b4dbe73cc6dadc2480e319631310981540dabe95893de983106d7b103/tox_uv_bare-1.37.0.tar.gz"
+upload-time = 2026-10-11 00:33:52+00:00
+size = 32961
+
+[packages.sdist.hashes]
+sha256 = "97418f2febec7da57d010ca6ffed8c7d56be9d425f381b74c7fe8d0213fccad9"
+
+[[packages.wheels]]
+url = "https://files.pythonhosted.org/packages/52/4c/9596668bb448b868c684a3df9190103e9bc2f7de13e646628ac914f928be/tox_uv_bare-1.37.0-py3-none-any.whl"
+upload-time = 2026-10-11 00:33:51+00:00
+size = 22322
+
+[packages.wheels.hashes]
+sha256 = "a596c0726690e2182cc85dfbc2f39e6fddacb8f7ea08bf8bace122a17397cd13"
 
 [[packages]]
 name = "translationstring"
@@ -8481,7 +8518,7 @@ sha256 = "b854164df26db268af05f49aa5c0344b10e27a494343ff05b1e0bad3b135f5a7"
 name = "typing-extensions"
 version = "4.16.0"
 index = "https://pypi.org/simple"
-marker = "\"pkg-meta\" in dependency_groups or (\"project-runtime\" in dependency_groups and (python_full_version < '3.13')) or (\"test\" in dependency_groups and (python_full_version < '3.15'))"
+marker = "\"pkg-meta\" in dependency_groups or (\"ci\" in dependency_groups and (python_full_version < '3.13')) or (\"project-runtime\" in dependency_groups and (python_full_version < '3.13')) or (\"test\" in dependency_groups and (python_full_version < '3.15'))"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz"
@@ -8547,7 +8584,7 @@ sha256 = "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
 name = "uv"
 version = "0.13.1"
 index = "https://pypi.org/simple"
-marker = "\"pkg-meta\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"pkg-meta\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/ef/10/81f499de381ac81e09961e1c19255c5cf49563ac418464def4190b6c7400/uv-0.13.1.tar.gz"
@@ -8748,7 +8785,7 @@ sha256 = "0845808a985976acbceaa1fbb871c7fac4fb28ae75453232970e9c2c2866dbf4"
 name = "virtualenv"
 version = "21.14.7"
 index = "https://pypi.org/simple"
-marker = "\"project-runtime\" in dependency_groups"
+marker = "\"ci\" in dependency_groups or \"project-runtime\" in dependency_groups"
 
 [packages.sdist]
 url = "https://files.pythonhosted.org/packages/dc/3f/935cf1757643381fb7f7cc98197b4bc119223d9c2cf37dc3b03ad2a4455f/virtualenv-21.14.7.tar.gz"
