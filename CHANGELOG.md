@@ -114,7 +114,7 @@
 ### Changes
 
 - Omit the GitHub summary when only one tox environment runs ([#166](https://github.com/tox-dev/tox-gh/pull/166)) by
-  [@kemzeb](https://github.com/kemzeb).
+  [@kemzeb](https://github.com/kemzeb) and [@gaborbernat](https://github.com/gaborbernat).
 
 <a name="release-1-4-4"></a>
 
