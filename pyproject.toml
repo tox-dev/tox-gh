@@ -57,6 +57,10 @@ test = [
   "pytest-cov>=7.1",
   "pytest-mock>=3.16",
 ]
+pkg-meta = [
+  "check-wheel-contents>=0.6.3",
+  "twine>=7",
+]
 release = [
   "prek>=0.5",
   "release-creator @ git+https://github.com/tox-dev/release-creator@5ab33234939cf2969d25a11ba477c31eb264067c",
