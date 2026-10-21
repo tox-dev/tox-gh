@@ -60,10 +60,20 @@ commands = [ [ "pre-commit", "run", "--all-files", "--show-diff-on-failure", { r
 [env.pkg_meta]
 description = "check that the long description is valid"
 skip_install = true
-deps = [ "uv>=0.12.22" ]
-dependency_groups = [ "pkg-meta" ]
+dependency_groups = [ "pkg-meta", "release" ]
 commands = [
-  [ "uv", "build", "--sdist", "--wheel", "--out-dir", "{env_tmp_dir}", "." ],
+  [
+    "uv", "pip", "sync", "--preview-features", "pylock",
+    "--python", "{env_python}",
+    "--group", "pkg-meta", "--group", "release", "pylock.toml",
+  ],
+  [ "release-creator", "build-constraints", "--lock", "pylock.toml", "--output", "{env_dir}{/}build-constraints.txt" ],
+  [
+    "uv", "build", "--sdist", "--wheel",
+    "--out-dir", "{env_tmp_dir}",
+    "--build-constraints", "{env_dir}{/}build-constraints.txt",
+    "--require-build-hashes", ".",
+  ],
   [ "twine", "check", "{env_tmp_dir}{/}*" ],
   [ "check-wheel-contents", "--no-config", "{env_tmp_dir}" ],
 ]

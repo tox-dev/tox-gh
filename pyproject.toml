@@ -60,6 +60,7 @@ test = [
 pkg-meta = [
   "check-wheel-contents>=0.6.3",
   "twine>=7",
+  "uv>=0.12.22",
 ]
 release = [
   "prek>=0.5",
