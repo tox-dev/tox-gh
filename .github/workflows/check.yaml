@@ -17,6 +17,8 @@ jobs:
   test:
     name: test with ${{ matrix.env }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      TOX_TOOLS: ${{ runner.temp }}/tox-tools
     strategy:
       fail-fast: false
       matrix:
@@ -50,20 +52,22 @@ jobs:
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
       - name: Create tox environment
         shell: bash
-        run: uv venv --python 3.15 "$RUNNER_TEMP/tox-tools"
+        run: uv venv --python 3.15 "$TOX_TOOLS"
       - name: Install locked tox tools
         shell: bash
-        run: uv pip sync --preview-features pylock --python "$RUNNER_TEMP/tox-tools" --group ci --group project-runtime --group build pylock.toml
+        run: |
+          uv pip sync --preview-features pylock --python "$TOX_TOOLS" \
+            --group ci --group project-runtime --group build pylock.toml
       - name: Install tox-gh from checkout
         shell: bash
-        run: uv pip install --python "$RUNNER_TEMP/tox-tools" --no-deps --no-build-isolation .
+        run: uv pip install --python "$TOX_TOOLS" --no-deps --no-build-isolation .
       - name: Add tox to PATH
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == Windows ]]; then
-            echo "$RUNNER_TEMP/tox-tools/Scripts" >> "$GITHUB_PATH"
+            echo "$TOX_TOOLS/Scripts" >> "$GITHUB_PATH"
           else
-            echo "$RUNNER_TEMP/tox-tools/bin" >> "$GITHUB_PATH"
+            echo "$TOX_TOOLS/bin" >> "$GITHUB_PATH"
           fi
       - name: Install Python
         if: matrix.env != '3.15'
@@ -95,7 +99,9 @@ jobs:
         run: |
           set -euo pipefail
           uv venv --python 3.15 "$RUNNER_TEMP/release-tools"
-          uv pip sync --preview-features pylock --python "$RUNNER_TEMP/release-tools/bin/python" --group release pylock.toml
+          uv pip sync --preview-features pylock \
+            --python "$RUNNER_TEMP/release-tools/bin/python" \
+            --group release pylock.toml
           echo "$RUNNER_TEMP/release-tools/bin" >> "$GITHUB_PATH"
       - uses: tox-dev/github-workflows/validate-news@a250ca3524857236e288764651851010939b6f71
   gate:

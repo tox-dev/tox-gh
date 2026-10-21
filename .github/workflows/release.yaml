@@ -88,7 +88,11 @@ jobs:
           packages-dir: selected-dist
           skip-existing: true
   verify-pypi:
-    if: ${{ always() && !cancelled() && needs.stage-pypi.result == 'success' && (needs.publish-pypi.result == 'success' || needs.publish-pypi.result == 'skipped') }}
+    if: |
+      always() && !cancelled() &&
+      needs.stage-pypi.result == 'success' &&
+      (needs.publish-pypi.result == 'success' ||
+      needs.publish-pypi.result == 'skipped')
     needs: [stage-pypi, publish-pypi]
     runs-on: ubuntu-26.04
     permissions:
