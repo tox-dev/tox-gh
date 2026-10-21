@@ -60,7 +60,8 @@ commands = [ [ "pre-commit", "run", "--all-files", "--show-diff-on-failure", { r
 [env.pkg_meta]
 description = "check that the long description is valid"
 skip_install = true
-dependency_groups = [ "pkg-meta", "release" ]
+dependency_groups = []
+allowlist_externals = [ "uv" ]
 commands = [
   [
     "uv", "pip", "sync", "--preview-features", "pylock",
