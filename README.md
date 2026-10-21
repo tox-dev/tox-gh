@@ -6,8 +6,8 @@ request number and credits its human authors. Use the `skip news` label for main
 fragment only when the pull request supplies one.
 
 Choose `feature` for added or removed Python support and new capabilities, `change` for changed behavior, `bugfix` for
-fixes, and `doc` for user documentation. The other categories are `security`, `performance`, `deprecation`, `removal`,
-and `packaging`. Keep each fragment about one user-visible change.
+fixes, and `doc` for user documentation. The other categories are `breaking`, `security`, `performance`, `deprecation`,
+`removal`, and `packaging`. Keep each fragment about one user-visible change.
 
 [![PyPI version](https://badge.fury.io/py/tox-gh.svg)](https://badge.fury.io/py/tox-gh)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh.svg)](https://pypi.python.org/pypi/tox-gh/)
