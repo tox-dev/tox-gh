@@ -28,12 +28,13 @@ Select the matching tox environment for free-threaded Python 3.15.
 Internal maintenance needs no fragment. Apply the `skip news` label to a human-authored maintenance pull request; the
 bot labeling workflow handles supported automation. A bot-supplied fragment is kept.
 
-To preview pending news locally, install the development environment and let the fragments select the next version:
+To preview pending news locally, install the locked release tools and let the fragments select the next version:
 
 ```bash
-tox run -e dev --notest
-version=$(git tag --list | .tox/dev/bin/release-creator tags --next auto --directory changelog.d)
-.tox/dev/bin/towncrier build --draft --version "$version"
+uv venv --python 3.15 .tox/release-tools
+uv pip sync --preview-features pylock --python .tox/release-tools/bin/python --group release pylock.toml
+version=$(git tag --list | .tox/release-tools/bin/release-creator tags --next auto --directory changelog.d)
+.tox/release-tools/bin/towncrier build --draft --version "$version"
 ```
 
 The draft shows named fragments before merge. The final changelog gains pull request links and author credits after the
