@@ -11,6 +11,11 @@ repos:
     hooks:
       - id: check-github-workflows
         args: ["--verbose"]
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+        args: ["-ignore", 'label "ubuntu-26[.]04" is unknown'] # GitHub offers this runner before actionlint lists it.
   - repo: https://github.com/codespell-project/codespell
     rev: 57b21406f092110c18776e39b0bda50d37c945c8 # frozen: v2.4.3
     hooks:
