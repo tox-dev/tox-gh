@@ -11,14 +11,11 @@ env:
   dists-artifact-name: python-package-distributions
 jobs:
   build:
-    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+    uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@a32ce094895292b19eea422fc6500f1ef1ae8d5f
     permissions:
       contents: read
-      pull-requests: read
     with:
       changelog: CHANGELOG.md
-      fragments: changelog.d
-      format: markdown
       artifact-base-url: https://pypi.org/project/tox-gh/
   stage-pypi:
     needs: [build, github-notes]
@@ -42,7 +39,7 @@ jobs:
           name: ${{ env.dists-artifact-name }}
           path: dist
       - id: stage
-        uses: tox-dev/github-workflows/reconcile-pypi-artifacts@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+        uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         with:
           project: tox-gh
           version: ${{ github.ref_name }}
@@ -75,7 +72,7 @@ jobs:
           name: missing-python-manifest
           path: ${{ runner.temp }}/manifest
       - id: select
-        uses: tox-dev/github-workflows/select-pypi-artifacts@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+        uses: tox-dev/github-workflows/select-pypi-artifacts@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         with:
           dist: dist
           manifest: ${{ runner.temp }}/manifest/pypi-missing-names.txt
@@ -113,7 +110,7 @@ jobs:
         with:
           name: ${{ env.dists-artifact-name }}
           path: dist
-      - uses: tox-dev/github-workflows/reconcile-pypi-artifacts@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+      - uses: tox-dev/github-workflows/reconcile-pypi-artifacts@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         with:
           project: tox-gh
           version: ${{ github.ref_name }}
@@ -212,7 +209,7 @@ jobs:
         with:
           name: contributor-metadata
           path: ${{ runner.temp }}/contributor-metadata
-      - uses: tox-dev/github-workflows/render-release-notes@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+      - uses: tox-dev/github-workflows/render-release-notes@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         with:
           tag: ${{ github.ref_name }}
           changelog: CHANGELOG.md
@@ -236,7 +233,7 @@ jobs:
         with:
           name: github-release-notes
           path: ${{ runner.temp }}/github-release-notes
-      - uses: tox-dev/github-workflows/publish-github-release@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+      - uses: tox-dev/github-workflows/publish-github-release@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         env:
           GH_TOKEN: ${{ github.token }}
         with:
@@ -256,7 +253,7 @@ jobs:
         with:
           name: github-release-notes
           path: ${{ runner.temp }}/github-release-notes
-      - uses: tox-dev/github-workflows/publish-github-release@9a4e76e2f4901856f2784f6c0efc89278c518b1f
+      - uses: tox-dev/github-workflows/publish-github-release@a32ce094895292b19eea422fc6500f1ef1ae8d5f
         env:
           GH_TOKEN: ${{ github.token }}
         with:
