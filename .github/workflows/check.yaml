@@ -50,14 +50,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >>"$GITHUB_PATH"
-      - name: Create tox environment
-        shell: bash
-        run: uv venv --python 3.15 "$TOX_TOOLS"
       - name: Install locked tox tools
-        shell: bash
-        run: |
-          uv pip sync --preview-features pylock --python "$TOX_TOOLS" \
-            --group ci --group project-runtime --group build pylock.toml
+        uses: tox-dev/github-workflows/install-locked-tools@24e7c78489b6e2adb7b8f881761a5c2dbfe03fee
+        with:
+          venv: ${{ env.TOX_TOOLS }}
+          groups: ci project-runtime build
       - name: Install tox-gh from checkout
         shell: bash
         run: uv pip install --python "$TOX_TOOLS" --no-deps --no-build-isolation .
@@ -96,22 +93,21 @@ jobs:
           python-version: "3.15"
           enable-cache: false
       - name: Install locked release tools
-        run: |
-          set -euo pipefail
-          uv venv --python 3.15 "$RUNNER_TEMP/release-tools"
-          uv pip sync --preview-features pylock \
-            --python "$RUNNER_TEMP/release-tools/bin/python" \
-            --group release pylock.toml
-          echo "$RUNNER_TEMP/release-tools/bin" >>"$GITHUB_PATH"
-      - uses: tox-dev/github-workflows/validate-news@2b4ed19340a7ec97020f4fd0a403531845c49356
+        uses: tox-dev/github-workflows/install-locked-tools@24e7c78489b6e2adb7b8f881761a5c2dbfe03fee
+        with:
+          venv: ${{ runner.temp }}/release-tools
+      - name: Add installed tools to PATH
+        run: echo "$RUNNER_TEMP/release-tools/bin" >>"$GITHUB_PATH"
+      - uses: tox-dev/github-workflows/validate-news@24e7c78489b6e2adb7b8f881761a5c2dbfe03fee
   hook-update-cooldown:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-26.04
     permissions:
+      actions: read
       contents: read
       pull-requests: read
     steps:
-      - uses: tox-dev/github-workflows/check-hook-update-cooldown@2b4ed19340a7ec97020f4fd0a403531845c49356
+      - uses: tox-dev/github-workflows/check-hook-update-cooldown@24e7c78489b6e2adb7b8f881761a5c2dbfe03fee
         with:
           repository: ${{ github.repository }}
           pull-request: ${{ github.event.pull_request.number }}
