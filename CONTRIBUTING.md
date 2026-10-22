@@ -32,7 +32,7 @@ To preview pending news locally, install the locked release tools and let the fr
 
 ```bash
 uv venv --python 3.15 .tox/release-tools
-uv pip sync --preview-features pylock --python .tox/release-tools/bin/python --group release pylock.toml
+uv pip sync --preview-features pylock --python .tox/release-tools/bin/python --group release-news pylock.toml
 version=$(git tag --list | .tox/release-tools/bin/release-creator tags --next auto --directory changelog.d)
 .tox/release-tools/bin/towncrier build --draft --version "$version"
 ```

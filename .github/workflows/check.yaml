@@ -50,14 +50,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >>"$GITHUB_PATH"
-      - name: Install locked tox tools
-        uses: tox-dev/github-workflows/install-locked-tools@33db207c963ad07b8d2bff4099143593fd4100b2
-        with:
-          venv: ${{ env.TOX_TOOLS }}
-          groups: ci project-runtime build
-      - name: Install tox-gh from checkout
+      - name: Install current tox tools and tox-gh
         shell: bash
-        run: uv pip install --python "$TOX_TOOLS" --no-deps --no-build-isolation .
+        run: |
+          uv venv --python 3.15 "$TOX_TOOLS"
+          uv pip install --python "$TOX_TOOLS" --group ci .
       - name: Add tox to PATH
         shell: bash
         run: |
@@ -93,12 +90,13 @@ jobs:
           python-version: "3.15"
           enable-cache: false
       - name: Install locked release tools
-        uses: tox-dev/github-workflows/install-locked-tools@33db207c963ad07b8d2bff4099143593fd4100b2
+        uses: tox-dev/github-workflows/install-locked-tools@fcba1cc52c8e8bbb8c3305ee5e4bc454b9ab0c50
         with:
+          groups: release-news
           venv: ${{ runner.temp }}/release-tools
       - name: Add installed tools to PATH
         run: echo "$RUNNER_TEMP/release-tools/bin" >>"$GITHUB_PATH"
-      - uses: tox-dev/github-workflows/validate-news@33db207c963ad07b8d2bff4099143593fd4100b2
+      - uses: tox-dev/github-workflows/validate-news@fcba1cc52c8e8bbb8c3305ee5e4bc454b9ab0c50
   hook-update-cooldown:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-26.04
@@ -107,7 +105,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: tox-dev/github-workflows/check-hook-update-cooldown@33db207c963ad07b8d2bff4099143593fd4100b2
+      - uses: tox-dev/github-workflows/check-hook-update-cooldown@fcba1cc52c8e8bbb8c3305ee5e4bc454b9ab0c50
         with:
           repository: ${{ github.repository }}
           pull-request: ${{ github.event.pull_request.number }}

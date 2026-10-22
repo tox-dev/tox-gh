@@ -66,7 +66,7 @@ commands = [
   [
     "uv", "pip", "sync", "--preview-features", "pylock",
     "--python", "{env_python}",
-    "--group", "pkg-meta", "--group", "release", "pylock.toml",
+    "--group", "pkg-meta", "--group", "release-notes", "pylock.toml",
   ],
   [ "release-creator", "build-constraints", "--lock", "pylock.toml", "--output", "{env_dir}{/}build-constraints.txt" ],
   [
