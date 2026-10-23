@@ -66,14 +66,12 @@ commands = [
   [
     "uv", "pip", "sync", "--preview-features", "pylock",
     "--python", "{env_python}",
-    "--group", "pkg-meta", "--group", "release-notes", "pylock.toml",
+    "--group", "pkg-meta", "--group", "build", "--require-hashes", "pylock.toml",
   ],
-  [ "release-creator", "build-constraints", "--lock", "pylock.toml", "--output", "{env_dir}{/}build-constraints.txt" ],
   [
-    "uv", "build", "--sdist", "--wheel",
+    "uv", "build", "--python", "{env_python}", "--no-build-isolation", "--sdist", "--wheel",
     "--out-dir", "{env_tmp_dir}",
-    "--build-constraints", "{env_dir}{/}build-constraints.txt",
-    "--require-build-hashes", ".",
+    ".",
   ],
   [ "twine", "check", "{env_tmp_dir}{/}*" ],
   [ "check-wheel-contents", "--no-config", "{env_tmp_dir}" ],
