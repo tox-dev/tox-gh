@@ -14,8 +14,6 @@ jobs:
     uses: tox-dev/github-workflows/.github/workflows/validate-python-release.yaml@1b7d58c3e744b505215e1cb11697a80737b0e94d
     permissions:
       contents: read
-    with:
-      changelog: CHANGELOG.md
   publish-pypi:
     needs:
       - build
