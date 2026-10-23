@@ -66,13 +66,14 @@ commands = [
   [
     "uv", "pip", "sync", "--preview-features", "pylock",
     "--python", "{env_python}",
-    "--group", "pkg-meta", "--group", "build", "--require-hashes", "pylock.toml",
+    "--group", "build", "--require-hashes", "pylock.toml",
   ],
   [
     "uv", "build", "--python", "{env_python}", "--no-build-isolation", "--sdist", "--wheel",
     "--out-dir", "{env_tmp_dir}",
     ".",
   ],
+  [ "uv", "pip", "install", "--python", "{env_python}", "--group", "pkg-meta" ],
   [ "twine", "check", "{env_tmp_dir}{/}*" ],
   [ "check-wheel-contents", "--no-config", "{env_tmp_dir}" ],
 ]
