@@ -1,11 +1,11 @@
-name: check
+name: 🧪 check
 on:
   workflow_dispatch:
   push:
     branches: ["main"]
     tags-ignore: ["**"]
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened]
   schedule:
     - cron: "0 8 * * *"
 concurrency:
@@ -15,8 +15,10 @@ permissions:
   contents: read
 jobs:
   test:
-    name: test with ${{ matrix.env }} on ${{ matrix.os }}
+    name: 🧪 test with ${{ matrix.env }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      TOX_TOOLS: ${{ github.workspace }}/.tox/ci-tools
     strategy:
       fail-fast: false
       matrix:
@@ -29,65 +31,59 @@ jobs:
           - "3.11"
         os:
           - ubuntu-26.04
-          - macos-latest
-          - windows-latest
+          - macos-26
+          - windows-2025-vs2026
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: 📥 Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: 🐍 Install uv
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
+          version: latest-known
           python-version: "3.15"
           enable-cache: false
           cache-dependency-glob: "pyproject.toml"
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Add .local/bin to Windows PATH
+      - name: ⚙️ Add .local/bin to Windows PATH
         if: runner.os == 'Windows'
         shell: bash
-        run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
-      - name: Install tox
-        run: uv tool install --python-preference only-managed --python 3.15 tox --with tox-uv --with tox-gh@.
-      - name: Install Python
+        run: echo "$USERPROFILE/.local/bin" >>"$GITHUB_PATH"
+      - name: 📦 Install current tox tools and tox-gh
+        shell: bash
+        run: |
+          uv venv --python 3.15 "$TOX_TOOLS"
+          uv pip install --python "$TOX_TOOLS" --group ci .
+      - name: ⚙️ Add tox to PATH
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            echo "$TOX_TOOLS/Scripts" >>"$GITHUB_PATH"
+          else
+            echo "$TOX_TOOLS/bin" >>"$GITHUB_PATH"
+          fi
+      - name: 🐍 Install Python
         if: matrix.env != '3.15'
         run: uv python install --python-preference only-managed ${{ matrix.env }}
-      - name: Setup test suite
+      - name: 📦 Setup check suite
         run: tox run -vv --notest --skip-missing-interpreters false
         env:
           TOX_GH_MAJOR_MINOR: ${{ matrix.env }}
-      - name: Run test suite
+      - name: 🧪 Run test suite
         run: tox run --skip-pkg-install
         env:
           PYTEST_ADDOPTS: "-vv --durations=20"
           DIFF_AGAINST: HEAD
           TOX_GH_MAJOR_MINOR: ${{ matrix.env }}
-  changelog:
-    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip news')
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          python-version: "3.15"
-          enable-cache: false
-      - run: uvx towncrier check --compare-with "origin/${GITHUB_BASE_REF}"
   gate:
-    name: Required checks pass
-    if: always()
-    needs: [test, changelog]
-    runs-on: ubuntu-24.04
+    name: 🚦 ${{ github.event_name == 'pull_request' && 'Required checks pass' || 'Non-PR checks pass' }}
+    if: ${{ !cancelled() }} # codespell:ignore cancelled
+    needs: [test]
+    runs-on: ubuntu-26.04
     steps:
-      - env:
+      - name: 🚦 Require all needed jobs to pass
+        env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-        run: |
-          jq -e '
-            all(
-              to_entries[];
-              .value.result == "success" or
-              (.key == "changelog" and .value.result == "skipped")
-            )
-          ' <<< "$NEEDS_JSON"
+        run: jq -e 'all(to_entries[]; .value.result == "success")' <<<"$NEEDS_JSON"

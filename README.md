@@ -1,7 +1,6 @@
 # tox-gh
 
-See the [changelog](CHANGELOG.md) for released changes. Pull requests need a `changelog.d/<PR>.<type>.md` fragment; use
-the `skip news` label for changes that do not need release notes.
+See the [changelog](CHANGELOG.md) for released changes and the [contribution guide](CONTRIBUTING.md) for news fragments.
 
 [![PyPI version](https://badge.fury.io/py/tox-gh.svg)](https://badge.fury.io/py/tox-gh)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh.svg)](https://pypi.python.org/pypi/tox-gh/)
