@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+<a name="release-1-9-1"></a>
+
+## 1.9.1 (2026-10-27)
+
+<a name="release-1-9-1-fixed"></a>
+
+### Fixed
+
+- Fix repository links in the PyPI project description ([#310](https://github.com/tox-dev/tox-gh/pull/310)) by
+  [@gaborbernat](https://github.com/gaborbernat).
+
 <a name="release-1-9-0"></a>
 
 ## 1.9.0 (2026-10-10)
