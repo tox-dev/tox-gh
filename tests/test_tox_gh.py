@@ -69,6 +69,16 @@ def test_gh_toxenv_set(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator)
     assert "tox-gh won't override envlist because envlist is explicitly given via TOXENV" in result.out
 
 
+def test_gh_no_matching_python_mapping(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    project = tox_project({"tox.ini": "[testenv]\npackage=skip\n[gh]\npython=\n    0=a"})
+    result = project.run()
+    result.assert_success()
+    assert "running tox-gh" in result.out
+    assert "tox-gh set" not in result.out
+
+
 @pytest.mark.parametrize("via_env", [True, False])
 def test_gh_ok(
     monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, summary_output_path: Path, via_env: bool

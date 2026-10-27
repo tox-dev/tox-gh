@@ -34,6 +34,7 @@ commands = [
       "html:{env_tmp_dir}{/}htmlcov",
       "--cov-report",
       "xml:{work_dir}{/}coverage.{env_name}.xml",
+      "--cov-fail-under=96",
       "tests",
       "--run-integration",
     ], extend = true },
@@ -59,9 +60,20 @@ commands = [ [ "pre-commit", "run", "--all-files", "--show-diff-on-failure", { r
 [env.pkg_meta]
 description = "check that the long description is valid"
 skip_install = true
-deps = [ "check-wheel-contents>=0.6.3", "twine>=7", "uv>=0.12.22" ]
+dependency_groups = []
+allowlist_externals = [ "uv" ]
 commands = [
-  [ "uv", "build", "--sdist", "--wheel", "--out-dir", "{env_tmp_dir}", "." ],
+  [
+    "uv", "pip", "sync", "--preview-features", "pylock",
+    "--python", "{env_python}",
+    "--group", "build", "--require-hashes", "pylock.toml",
+  ],
+  [
+    "uv", "build", "--python", "{env_python}", "--no-build-isolation", "--sdist", "--wheel",
+    "--out-dir", "{env_tmp_dir}",
+    ".",
+  ],
+  [ "uv", "pip", "install", "--python", "{env_python}", "--group", "pkg-meta" ],
   [ "twine", "check", "{env_tmp_dir}{/}*" ],
   [ "check-wheel-contents", "--no-config", "{env_tmp_dir}" ],
 ]
@@ -75,19 +87,9 @@ commands = [ [ "ty", "check", "--error", "all", "--output-format", "concise", "-
 [env.dev]
 description = "dev environment with all deps at {envdir}"
 package = "editable"
-deps = [
-  { replace = "ref", of = [ "env", "release", "deps" ], extend = true },
-  { replace = "ref", of = [ "requires" ], extend = true },
-]
-dependency_groups = [ "test" ]
-extras = [ "docs" ]
+deps = [ { replace = "ref", of = [ "requires" ], extend = true } ]
+dependency_groups = [ "release", "test" ]
 commands = [ [ "uv", "pip", "tree" ], [ "python", "-c", 'print(r"{env_python}")' ] ]
-
-[env.release]
-description = "do a release, required posargs of the version number"
-skip_install = true
-deps = [ "gitpython>=3.2", "packaging>=26.3", "towncrier>=26.9" ]
-commands = [ [ "python", "{tox_root}/tasks/release.py", "--version", "{posargs}" ] ]
 
 [gh.python]
 "3.15" = [ "3.15", "type", "pkg_meta" ]

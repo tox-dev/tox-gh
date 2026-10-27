@@ -2,6 +2,7 @@
 .idea
 *.egg-info
 .tox/
+/.venv
 .coverage*
 coverage.xml
 .*_cache
@@ -10,3 +11,4 @@ __pycache__
 /build
 dist
 src/tox_gh/version.py
+/uv.lock
