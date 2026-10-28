@@ -59,8 +59,8 @@ An attacker who controls any of these already has what tox-gh could give them:
 ## Release chain
 
 Releases run on the shared [tox-dev/github-workflows](https://github.com/tox-dev/github-workflows) pipeline. A release
-App, not a person, pushes the release commit and tag; the build installs its tools hash-checked from `pylock.toml` with
-a seven-day upload cooldown; PyPI receives the files through
+App, not a person, pushes the release commit and tag; the build installs its tools from a hash-checked `pylock.toml`
+resolved with a seven-day upload cooldown by default; PyPI receives the files through
 [trusted publishing](https://docs.pypi.org/trusted-publishers/) with attestations, and the GitHub Release is immutable.
 Every workflow pins third-party actions to a commit SHA.
 
@@ -71,6 +71,12 @@ Every workflow pins third-party actions to a commit SHA.
 | A test prints `::add-mask::` or `::error::`          | Not a vulnerability | Job output is the runner's concern; tox-gh does not filter it. |
 | tox-gh writes a summary line into another file       | Vulnerability       | Write target is a guarantee.                                   |
 | The matrix runs the wrong environments for a version | Bug                 | Selection correctness.                                         |
+
+## Severity
+
+- **High:** tox-gh writes anywhere other than the step summary file.
+- **Medium:** tox-gh emits a workflow command built from anything other than tox environment names and outcomes.
+- **Low:** a crash or confusing error on a malformed `[gh]` mapping.
 
 ## Accepted risks
 
