@@ -6,6 +6,8 @@ See the [changelog](CHANGELOG.md) for released changes and the [contribution gui
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh.svg)](https://pypi.python.org/pypi/tox-gh/)
 [![check](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml/badge.svg)](https://github.com/tox-dev/tox-gh/actions/workflows/check.yaml)
 [![Downloads](https://static.pepy.tech/badge/tox-gh/month)](https://pepy.tech/project/tox-gh)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tox-dev/tox-gh/badge)](https://scorecard.dev/viewer/?uri=github.com/tox-dev/tox-gh)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16260/badge)](https://www.bestpractices.dev/projects/16260)
 
 Seamless integration of tox into GitHub Actions.
 
