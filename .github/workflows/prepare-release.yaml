@@ -16,7 +16,7 @@ permissions: {}
 jobs:
   prepare:
     name: 🏷️ Prepare Towncrier release
-    uses: tox-dev/github-workflows/.github/workflows/prepare-towncrier-release.yaml@534a196a132a52365c464e1227d4c46f30968f29 # 6.4.0
+    uses: tox-dev/github-workflows/.github/workflows/prepare-towncrier-release.yaml@2c1f5e4ceda37c41eb8367b5cbeaa741aa60a566 # 6.5.2
     permissions:
       contents: read
       pull-requests: read
