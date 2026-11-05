@@ -42,3 +42,7 @@ version=$(git tag --list | .tox/release-tools/bin/release-creator tags --next au
 
 The draft shows named fragments before merge. The final changelog gains pull request links after the squash commit is on
 `main`, and the prepare workflow adds the credits.
+
+## Tests
+
+Add a test for every new feature and bug fix. A change without a test needs a reason in the pull request description.
