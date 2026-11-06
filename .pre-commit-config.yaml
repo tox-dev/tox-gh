@@ -14,7 +14,7 @@ repos:
       - id: check-github-workflows
         args: ["--verbose"]
   - repo: https://github.com/rhysd/actionlint
-    rev: bf6b9188a5fd7b4e7b7d244a865a60165bdc6783
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:
       - id: actionlint
         args: ["-ignore", 'label "ubuntu-26[.]04" is unknown'] # GitHub offers this runner before actionlint lists it.
