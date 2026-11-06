@@ -76,10 +76,18 @@ jobs:
           PYTEST_ADDOPTS: "-vv --durations=20"
           DIFF_AGAINST: HEAD
           TOX_GH_MAJOR_MINOR: ${{ matrix.env }}
+  release:
+    name: 🏷️ Release dry run
+    uses: $/.github/workflows/prepare-release.yaml
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      dry-run: true
   gate:
     name: 🚦 ${{ github.event_name == 'pull_request' && 'Required checks pass' || 'Non-PR checks pass' }}
     if: ${{ !cancelled() }} # codespell:ignore cancelled
-    needs: [test]
+    needs: [test, release]
     runs-on: ubuntu-26.04
     steps:
       - name: 🚦 Require all needed jobs to pass
