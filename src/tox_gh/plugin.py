@@ -160,10 +160,7 @@ def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outco
 
 
 def _write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument] the flag reads as the run outcome at the call site
-    # Write a success or failure value to the GitHub step summary if it exists.
-    #
-    # :param success:
-    # :param message:
+    # GITHUB_STEP_SUMMARY is only set inside a GitHub Actions step, so elsewhere there is no summary to write to.
     if not GITHUB_STEP_SUMMARY:
         return
     summary_path = pathlib.Path(GITHUB_STEP_SUMMARY)
