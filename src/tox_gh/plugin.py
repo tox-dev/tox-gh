@@ -40,7 +40,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     :param core_conf: the core configuration
     :param state: tox state object
     """
-    global _WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement]
+    global _WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement] shared with tox_after_run_commands
 
     # https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
     core_conf.add_constant(
@@ -112,7 +112,7 @@ _STATE: Final[threading.local] = threading.local()
 
 
 @impl
-def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) -> None:  # ruff:ignore[any-type, unused-function-argument]
+def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) -> None:  # ruff:ignore[any-type, unused-function-argument] tox's hook spec fixes the signature
     """
     Run before installing to prepare an environment.
 
@@ -123,7 +123,7 @@ def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) 
     """
     if tox_env.core["is_on_gh_action"] and not getattr(_STATE, "installing", False):
         _STATE.installing = True
-        print("::group::tox:install")  # ruff:ignore[print]
+        print("::group::tox:install")  # ruff:ignore[print] GitHub reads workflow commands from stdout
 
 
 @impl
@@ -138,13 +138,13 @@ def tox_before_run_commands(tox_env: ToxEnv) -> None:
         if getattr(_STATE, "installing", False):
             # Traditional path: close the install group that was opened in tox_on_install
             _STATE.installing = False
-            print("::endgroup::")  # ruff:ignore[print]
+            print("::endgroup::")  # ruff:ignore[print] GitHub reads workflow commands from stdout
         # Always open the test execution group
-        print(f"::group::tox:{tox_env.name}")  # ruff:ignore[print]
+        print(f"::group::tox:{tox_env.name}")  # ruff:ignore[print] GitHub reads workflow commands from stdout
 
 
 @impl
-def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outcome]) -> None:  # ruff:ignore[unused-function-argument]
+def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outcome]) -> None:  # ruff:ignore[unused-function-argument] tox's hook spec fixes the signature
     """
     Run logic before after run commands.
 
@@ -154,12 +154,12 @@ def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outco
     :param outcomes: list of outcomes
     """
     if tox_env.core["is_on_gh_action"]:
-        print("::endgroup::")  # ruff:ignore[print]
+        print("::endgroup::")  # ruff:ignore[print] GitHub reads workflow commands from stdout
         if _WILL_RUN_MULTIPLE_ENVS:
             _write_to_summary(exit_code == Outcome.OK, tox_env.name)
 
 
-def _write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument]
+def _write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument] the flag reads as the run outcome at the call site
     # Write a success or failure value to the GitHub step summary if it exists.
     #
     # :param success:
