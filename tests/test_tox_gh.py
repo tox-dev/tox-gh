@@ -18,13 +18,11 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def _clear_env_var() -> Iterator[None]:
-    original = os.environ.pop("TOX_GH_MAJOR_MINOR", None)
+def _clear_env_var(monkeypatch: MonkeyPatch) -> Iterator[None]:
+    monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
     yield
-    if original is not None:
-        os.environ["TOX_GH_MAJOR_MINOR"] = original
-    else:
-        os.environ.pop("TOX_GH_MAJOR_MINOR", None)
+    # the plugin exports the variable itself, and tox's environment check runs before monkeypatch restores it
+    os.environ.pop("TOX_GH_MAJOR_MINOR", None)
 
 
 @pytest.fixture
@@ -74,33 +72,35 @@ def test_gh_no_matching_python_mapping(monkeypatch: MonkeyPatch, tox_project: To
     assert "tox-gh set" not in result.out
 
 
-@pytest.mark.parametrize("via_env", [True, False])
+@pytest.mark.parametrize(
+    "version_env",
+    [
+        pytest.param(f"{sys.version_info.major}.{sys.version_info.minor}", id="env-var"),
+        pytest.param("", id="detected"),
+    ],
+)
 def test_gh_ok(
-    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, tmp_path: Path, summary_output_path: Path, via_env: bool
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path, version_env: str
 ) -> None:
-    if via_env:
-        os.environ["TOX_GH_MAJOR_MINOR"] = f"{sys.version_info.major}.{sys.version_info.minor}"
-    else:
-        monkeypatch.setenv("PATH", "")
-    empty_requirements = tmp_path / "empty.txt"
-    empty_requirements.touch()
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("PATH", "")
+    monkeypatch.setenv("TOX_GH_MAJOR_MINOR", version_env)
     monkeypatch.delenv("TOXENV", raising=False)
     ini = f"""
     [testenv]
     package = editable
-    deps = -r {empty_requirements}
+    deps = -r empty.txt
     [gh]
     python =
         {sys.version_info[0]} = a, b
     """
-    result = tox_project({"tox.ini": ini}).run()
+    result = tox_project({"tox.ini": ini, "empty.txt": ""}).run()
     result.assert_success()
     assert result.out.splitlines() == [
         "ROOT: running tox-gh",
         "ROOT: tox-gh set a, b",
         "::group::tox:install",
-        f"a: install_deps> python -I -m pip install -r {empty_requirements}",
+        "a: install_deps> python -I -m pip install -r empty.txt",
         ANY,  # pip install setuptools wheel
         ANY,  # .pkg: _optional_hooks
         ANY,  # .pkg: get_requires_for_build_editable
@@ -115,7 +115,7 @@ def test_gh_ok(
         "::endgroup::",
         ANY,  # a finished
         "::group::tox:install",
-        f"b: install_deps> python -I -m pip install -r {empty_requirements}",
+        "b: install_deps> python -I -m pip install -r empty.txt",
         ANY,  # b: install_package
         "b: freeze> python -m pip freeze --all",
         ANY,  # freeze list
