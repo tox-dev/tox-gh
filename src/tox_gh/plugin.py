@@ -84,7 +84,12 @@ class _GhActionsConfigSet(ConfigSet):
 
 
 def get_python_version_keys() -> list[str]:
-    """:return: python spec for the python interpreter"""
+    """
+    Get the python spec keys matching the running interpreter.
+
+    :returns: python spec keys, most specific first
+    :raises RuntimeError: if the Python version cannot be detected
+    """
     if os.environ.get("TOX_GH_MAJOR_MINOR", ""):
         major_minor_version = os.environ["TOX_GH_MAJOR_MINOR"]
         return [major_minor_version, major_minor_version.split(".")[0]]
