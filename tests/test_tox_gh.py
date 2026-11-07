@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import sys
 from typing import TYPE_CHECKING
-from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
@@ -14,6 +13,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
+    from pytest_mock import MockerFixture
     from tox.pytest import MonkeyPatch, ToxProjectCreator
 
 
@@ -80,7 +80,11 @@ def test_gh_no_matching_python_mapping(monkeypatch: MonkeyPatch, tox_project: To
     ],
 )
 def test_gh_ok(
-    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path, version_env: str
+    monkeypatch: MonkeyPatch,
+    mocker: MockerFixture,
+    tox_project: ToxProjectCreator,
+    summary_output_path: Path,
+    version_env: str,
 ) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("PATH", "")
@@ -101,30 +105,30 @@ def test_gh_ok(
         "ROOT: tox-gh set a, b",
         "::group::tox:install",
         "a: install_deps> python -I -m pip install -r empty.txt",
-        ANY,  # pip install setuptools wheel
-        ANY,  # .pkg: _optional_hooks
-        ANY,  # .pkg: get_requires_for_build_editable
+        mocker.ANY,  # pip install setuptools wheel
+        mocker.ANY,  # .pkg: _optional_hooks
+        mocker.ANY,  # .pkg: get_requires_for_build_editable
         ".pkg: freeze> python -m pip freeze --all",
-        ANY,  # freeze list
-        ANY,  # .pkg: build_editable
-        ANY,  # a: install_package
+        mocker.ANY,  # freeze list
+        mocker.ANY,  # .pkg: build_editable
+        mocker.ANY,  # a: install_package
         "a: freeze> python -m pip freeze --all",
-        ANY,  # freeze list
+        mocker.ANY,  # freeze list
         "::endgroup::",
         "::group::tox:a",
         "::endgroup::",
-        ANY,  # a finished
+        mocker.ANY,  # a finished
         "::group::tox:install",
         "b: install_deps> python -I -m pip install -r empty.txt",
-        ANY,  # b: install_package
+        mocker.ANY,  # b: install_package
         "b: freeze> python -m pip freeze --all",
-        ANY,  # freeze list
+        mocker.ANY,  # freeze list
         "::endgroup::",
         "::group::tox:b",
         "::endgroup::",
-        ANY,  # a status
-        ANY,  # b status
-        ANY,  # outcome
+        mocker.ANY,  # a status
+        mocker.ANY,  # b status
+        mocker.ANY,  # outcome
     ]
 
     assert "a: OK" in result.out
@@ -135,7 +139,9 @@ def test_gh_ok(
     assert ":white_check_mark:: b" in summary_text
 
 
-def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summary_output_path: Path) -> None:
+def test_gh_fail(
+    monkeypatch: MonkeyPatch, mocker: MockerFixture, tox_project: ToxProjectCreator, summary_output_path: Path
+) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.delenv("TOXENV", raising=False)
     ini = f"""
@@ -154,24 +160,24 @@ def test_gh_fail(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator, summa
         "ROOT: tox-gh set a, b",
         "::group::tox:install",
         "a: freeze> python -m pip freeze --all",
-        ANY,  # freeze list
+        mocker.ANY,  # freeze list
         "::endgroup::",
         "::group::tox:a",
-        ANY,  # "a: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
-        ANY,  # process details
+        mocker.ANY,  # "a: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
+        mocker.ANY,  # process details
         "::endgroup::",
-        ANY,  # a finished
+        mocker.ANY,  # a finished
         "::group::tox:install",
         "b: freeze> python -m pip freeze --all",
-        ANY,  # freeze list
+        mocker.ANY,  # freeze list
         "::endgroup::",
         "::group::tox:b",
-        ANY,  # "b: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
-        ANY,  # b process details
+        mocker.ANY,  # "b: commands[0]> python -c 'exit(1)'", but without the quotes on Windows.
+        mocker.ANY,  # b process details
         "::endgroup::",
-        ANY,  # a status
-        ANY,  # b status
-        ANY,  # outcome
+        mocker.ANY,  # a status
+        mocker.ANY,  # b status
+        mocker.ANY,  # outcome
     ]
 
     assert "a: FAIL code 1" in result.out
@@ -234,21 +240,27 @@ def test_gh_expands_toml_factors(
         pytest.param(False, ["3.13", "3"], id="standard"),
     ],
 )
-def test_freethreaded_python_detection(monkeypatch: MonkeyPatch, free_threaded: bool, expected: list[str]) -> None:
+def test_freethreaded_python_detection(
+    monkeypatch: MonkeyPatch, mocker: MockerFixture, free_threaded: bool, expected: list[str]
+) -> None:
     monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
-    mock_info = MagicMock(version_info=(3, 13, 1, "final", 0), implementation="CPython", free_threaded=free_threaded)
-    with patch.object(plugin, "PythonInfo") as mock_cls:
-        mock_cls.from_exe.return_value = mock_info
-        result = get_python_version_keys()
+    mock_info = mocker.create_autospec(
+        plugin.PythonInfo,
+        instance=True,
+        version_info=(3, 13, 1, "final", 0),
+        implementation="CPython",
+        free_threaded=free_threaded,
+    )
+    mocker.patch.object(plugin.PythonInfo, "from_exe", autospec=True, return_value=mock_info)
+    result = get_python_version_keys()
     assert result == expected
 
 
-def test_python_detection_fails(monkeypatch: MonkeyPatch) -> None:
+def test_python_detection_fails(monkeypatch: MonkeyPatch, mocker: MockerFixture) -> None:
     monkeypatch.delenv("TOX_GH_MAJOR_MINOR", raising=False)
-    with patch.object(plugin, "PythonInfo") as mock_cls:
-        mock_cls.from_exe.return_value = None
-        with pytest.raises(RuntimeError, match="failed to detect Python version"):
-            get_python_version_keys()
+    mocker.patch.object(plugin.PythonInfo, "from_exe", autospec=True, return_value=None)
+    with pytest.raises(RuntimeError, match="failed to detect Python version"):
+        get_python_version_keys()
 
 
 def test_override_sets_tox_gh_major_minor(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
