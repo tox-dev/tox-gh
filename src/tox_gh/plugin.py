@@ -42,7 +42,10 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     """
     global _WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement]
 
-    core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=_is_running_on_actions())
+    # https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
+    core_conf.add_constant(
+        keys="is_on_gh_action", desc="flag for running on Github", value=os.environ.get("GITHUB_ACTIONS") == "true"
+    )
 
     bail_reason = None
     if not core_conf["is_on_gh_action"]:
@@ -67,12 +70,6 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
         _WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
         if not os.environ.get("TOX_GH_MAJOR_MINOR", ""):
             os.environ["TOX_GH_MAJOR_MINOR"] = next(i for i in python_version_keys if i in python_mapping)
-
-
-def _is_running_on_actions() -> bool:
-    # :return: True if running on GitHub Actions platform
-    # https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
-    return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
 class _GhActionsConfigSet(ConfigSet):
