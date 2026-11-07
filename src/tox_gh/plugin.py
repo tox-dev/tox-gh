@@ -29,13 +29,61 @@ if TYPE_CHECKING:
     from tox.tox_env.api import ToxEnv
 
 GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY", "")
-WILL_RUN_MULTIPLE_ENVS = False
+_WILL_RUN_MULTIPLE_ENVS = False
 
 
-def is_running_on_actions() -> bool:
-    """:return: True if running on GitHub Actions platform"""
+@impl
+def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
+    """
+    Add core configuration flags.
+
+    :param core_conf: the core configuration
+    :param state: tox state object
+    """
+    global _WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement]
+
+    core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=_is_running_on_actions())
+
+    bail_reason = None
+    if not core_conf["is_on_gh_action"]:
+        bail_reason = "tox is not running in GitHub Actions"
+    elif getattr(state.conf.options.env, "is_default_list", False) is False:
+        bail_reason = f"envlist is explicitly given via {'TOXENV' if os.environ.get('TOXENV', '') else '-e flag'}"
+    if bail_reason is not None:
+        logging.debug("tox-gh won't override envlist because %s", bail_reason)
+        return
+
+    logging.warning("running tox-gh")
+    gh_config = state.conf.get_section_config(Section(None, "gh"), base=[], of_type=_GhActionsConfigSet, for_env=None)
+    python_mapping = cast("dict[str, EnvList]", gh_config["python"])
+
+    python_version_keys = get_python_version_keys()
+    if (
+        env_list := next((python_mapping[i] for i in python_version_keys if i in python_mapping), None)
+    ) is not None:  # override the env_list core configuration with our values
+        env_list = EnvList([env for expression in env_list for env in extend_factors(expression)])
+        logging.warning("tox-gh set %s", ", ".join(env_list))
+        state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
+        _WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
+        if not os.environ.get("TOX_GH_MAJOR_MINOR", ""):
+            os.environ["TOX_GH_MAJOR_MINOR"] = next(i for i in python_version_keys if i in python_mapping)
+
+
+def _is_running_on_actions() -> bool:
+    # :return: True if running on GitHub Actions platform
     # https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+class _GhActionsConfigSet(ConfigSet):
+    @override
+    def register_config(self) -> None:
+        self.add_config(
+            "python",
+            of_type=dict[str, EnvList],
+            default={},
+            desc="python version to mapping",
+        )
 
 
 def get_python_version_keys() -> list[str]:
@@ -58,57 +106,6 @@ def get_python_version_keys() -> list[str]:
     return [major_minor_version, major_version]
 
 
-class GhActionsConfigSet(ConfigSet):
-    """GitHub Actions config set."""
-
-    @override
-    def register_config(self) -> None:
-        """Register the configurations."""
-        self.add_config(
-            "python",
-            of_type=dict[str, EnvList],
-            default={},
-            desc="python version to mapping",
-        )
-
-
-@impl
-def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
-    """
-    Add core configuration flags.
-
-    :param core_conf: the core configuration
-    :param state: tox state object
-    """
-    global WILL_RUN_MULTIPLE_ENVS  # ruff:ignore[global-statement]
-
-    core_conf.add_constant(keys="is_on_gh_action", desc="flag for running on Github", value=is_running_on_actions())
-
-    bail_reason = None
-    if not core_conf["is_on_gh_action"]:
-        bail_reason = "tox is not running in GitHub Actions"
-    elif getattr(state.conf.options.env, "is_default_list", False) is False:
-        bail_reason = f"envlist is explicitly given via {'TOXENV' if os.environ.get('TOXENV', '') else '-e flag'}"
-    if bail_reason is not None:
-        logging.debug("tox-gh won't override envlist because %s", bail_reason)
-        return
-
-    logging.warning("running tox-gh")
-    gh_config = state.conf.get_section_config(Section(None, "gh"), base=[], of_type=GhActionsConfigSet, for_env=None)
-    python_mapping = cast("dict[str, EnvList]", gh_config["python"])
-
-    python_version_keys = get_python_version_keys()
-    env_list = next((python_mapping[i] for i in python_version_keys if i in python_mapping), None)
-    if env_list is not None:  # override the env_list core configuration with our values
-        env_list = EnvList([env for expression in env_list for env in extend_factors(expression)])
-        logging.warning("tox-gh set %s", ", ".join(env_list))
-        state.conf.core.loaders.insert(0, MemoryLoader(env_list=env_list))
-        WILL_RUN_MULTIPLE_ENVS = len(env_list.envs) > 1
-        if not os.environ.get("TOX_GH_MAJOR_MINOR", ""):
-            matched_key = next(i for i in python_version_keys if i in python_mapping)
-            os.environ["TOX_GH_MAJOR_MINOR"] = matched_key
-
-
 _STATE = threading.local()
 
 
@@ -122,11 +119,9 @@ def tox_on_install(tox_env: ToxEnv, arguments: Any, section: str, of_type: str) 
     :param section: section of the installation
     :param of_type: type of the installation
     """
-    if tox_env.core["is_on_gh_action"]:
-        installing = getattr(_STATE, "installing", False)
-        if not installing:
-            _STATE.installing = True
-            print("::group::tox:install")  # ruff:ignore[print]
+    if tox_env.core["is_on_gh_action"] and not getattr(_STATE, "installing", False):
+        _STATE.installing = True
+        print("::group::tox:install")  # ruff:ignore[print]
 
 
 @impl
@@ -158,15 +153,23 @@ def tox_after_run_commands(tox_env: ToxEnv, exit_code: int, outcomes: list[Outco
     """
     if tox_env.core["is_on_gh_action"]:
         print("::endgroup::")  # ruff:ignore[print]
-        if WILL_RUN_MULTIPLE_ENVS:
-            write_to_summary(exit_code == Outcome.OK, tox_env.name)
+        if _WILL_RUN_MULTIPLE_ENVS:
+            _write_to_summary(exit_code == Outcome.OK, tox_env.name)
 
 
-def write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument]
-    """Write a success or failure value to the GitHub step summary if it exists."""
+def _write_to_summary(success: bool, message: str) -> None:  # ruff:ignore[boolean-type-hint-positional-argument]
+    # Write a success or failure value to the GitHub step summary if it exists.
+    #
+    # :param success:
+    # :param message:
     if not GITHUB_STEP_SUMMARY:
         return
     summary_path = pathlib.Path(GITHUB_STEP_SUMMARY)
     success_str = ":white_check_mark:" if success else ":negative_squared_cross_mark:"
     with summary_path.open("a+", encoding="utf-8") as summary_file:
         print(f"{success_str}: {message}", file=summary_file)
+
+
+__all__ = [
+    "get_python_version_keys",
+]
