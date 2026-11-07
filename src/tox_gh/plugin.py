@@ -8,7 +8,7 @@ import pathlib
 import shutil
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from tox.session.state import State
     from tox.tox_env.api import ToxEnv
 
-GITHUB_STEP_SUMMARY = os.getenv("GITHUB_STEP_SUMMARY", "")
+GITHUB_STEP_SUMMARY: Final[str] = os.getenv("GITHUB_STEP_SUMMARY", "")
 _WILL_RUN_MULTIPLE_ENVS = False
 
 
@@ -106,7 +106,7 @@ def get_python_version_keys() -> list[str]:
     return [major_minor_version, major_version]
 
 
-_STATE = threading.local()
+_STATE: Final[threading.local] = threading.local()
 
 
 @impl

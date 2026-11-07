@@ -1,5 +1,7 @@
 from __future__ import annotations
 
-pytest_plugins = [
+from typing import Final
+
+pytest_plugins: Final[list[str]] = [
     "tox.pytest",
 ]
