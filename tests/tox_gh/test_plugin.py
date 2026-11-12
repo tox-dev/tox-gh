@@ -7,7 +7,15 @@ from typing import TYPE_CHECKING
 import pytest
 from virtualenv.discovery.py_info import PythonInfo
 
-from tox_gh.plugin import get_python_version_keys
+from tox_gh import plugin
+from tox_gh.plugin import (
+    GITHUB_STEP_SUMMARY,
+    WILL_RUN_MULTIPLE_ENVS,
+    GhActionsConfigSet,
+    get_python_version_keys,
+    is_running_on_actions,
+    write_to_summary,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -29,8 +37,39 @@ def _clear_env_var(monkeypatch: MonkeyPatch) -> Iterator[None]:
 def summary_output_path(monkeypatch: MonkeyPatch, tmp_path: Path) -> Path:
     path = tmp_path / "gh_out"
     path.touch()
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(path))
+    monkeypatch.setattr(plugin, "GITHUB_STEP_SUMMARY", str(path))
     return path
+
+
+def test_public_imports() -> None:
+    namespace = {}
+    exec("from tox_gh.plugin import *", namespace)  # ruff:ignore[exec-builtin] exercise wildcard imports
+    assert namespace["GITHUB_STEP_SUMMARY"] is GITHUB_STEP_SUMMARY
+    assert namespace["GhActionsConfigSet"] is GhActionsConfigSet
+    assert namespace["WILL_RUN_MULTIPLE_ENVS"] is WILL_RUN_MULTIPLE_ENVS
+    assert namespace["get_python_version_keys"] is get_python_version_keys
+    assert namespace["is_running_on_actions"] is is_running_on_actions
+    assert namespace["tox_add_core_config"] is plugin.tox_add_core_config
+    assert namespace["tox_after_run_commands"] is plugin.tox_after_run_commands
+    assert namespace["tox_before_run_commands"] is plugin.tox_before_run_commands
+    assert namespace["tox_on_install"] is plugin.tox_on_install
+    assert namespace["write_to_summary"] is write_to_summary
+    assert "logging" not in namespace
+
+
+def test_is_running_on_actions(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    assert is_running_on_actions()
+    monkeypatch.setenv("GITHUB_ACTIONS", "false")
+    assert not is_running_on_actions()
+
+
+def test_write_to_summary(summary_output_path: Path) -> None:
+    for success, message in ((True, "passed"), (False, "failed")):
+        write_to_summary(success, message)
+    assert summary_output_path.read_text(encoding="utf-8") == (
+        ":white_check_mark:: passed\n:negative_squared_cross_mark:: failed\n"
+    )
 
 
 def test_gh_not_in_actions(monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator) -> None:
